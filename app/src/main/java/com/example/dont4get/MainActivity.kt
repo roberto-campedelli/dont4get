@@ -7,9 +7,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -48,7 +45,7 @@ enum class ButtonState { Pressed, Released }
 fun RecButton() {
 
     Scaffold(
-        topBar = { TopAppBar() },
+        topBar = { myTopAppBar() },
         floatingActionButton = { FAB() },
         isFloatingActionButtonDocked = false,
         floatingActionButtonPosition = FabPosition.End,
@@ -65,30 +62,13 @@ fun RecButton() {
                 }
             }
         }
-
     )
-
 }
 
-/*
-            BottomAppBar(
-                // Defaults to null, that is, No cutout
-                cutoutShape = MaterialTheme.shapes.small.copy(
-                    androidx.compose.foundation.shape.CornerSize(percent = 50)
-                )
-            ) {
-
-                /* Bottom app bar content */
-            }
-        }
-    ) {
-        // Screen content
-    }*/
-
 @Composable
-fun TopAppBar() {
+fun myTopAppBar() {
     TopAppBar(
-        title = { Text("Recording App") },
+        title = { Text("RECUP") },
     )
 }
 
@@ -96,15 +76,14 @@ fun TopAppBar() {
 fun FAB() {
     var buttonState by remember { mutableStateOf(ButtonState.Released) }
 
-
     FloatingActionButton(
         onClick = {},
         backgroundColor = Color.Red,
         modifier = Modifier
-            .size(80.dp),
-        elevation = FloatingActionButtonDefaults.elevation()
+            .padding(20.dp)
+            .size(85.dp),
 
-    ) {
+        ) {
         Box(modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
@@ -122,76 +101,32 @@ fun FAB() {
                     }
                 )
             })
+        if (buttonState == ButtonState.Pressed) {
+            CircularRecProgress()
+            LinearRecProgress()
+        }
         Text(text = "$buttonState")
 
     }
 }
 
-
-/*onClick = {
-           if (buttonState == ButtonState.Released) {
-               buttonState = com.example.dont4get.ButtonState.Pressed
-           } else
-               buttonState = ButtonState.Released
-       },*/
-
-
 @Composable
-fun BottomBar() {
-    val selectedIndex = remember { mutableStateOf(0) }
-    BottomNavigation(elevation = 10.dp) {
+fun CircularRecProgress() {
+    CircularProgressIndicator(
+        modifier = Modifier
+            .size(300.dp),
+        color = Color.Yellow,
+        strokeWidth = 3.5.dp,
 
-        BottomNavigationItem(
-            icon = {
-                Icon(imageVector = Icons.Default.Home, "")
-            },
-            label = { Text(text = "Home") },
-            selected = (selectedIndex.value == 0),
-            onClick = {
-                selectedIndex.value = 0
-            })
-
-        BottomNavigationItem(icon = {
-            Icon(imageVector = Icons.Default.Favorite, "")
-        },
-            label = { Text(text = "Favorite") },
-            selected = (selectedIndex.value == 1),
-            onClick = {
-                selectedIndex.value = 1
-            })
-
-    }
+        )
 }
 
 @Composable
-fun StartRec() {
-    Text(text = "start")
-
+fun LinearRecProgress() {
+    LinearProgressIndicator(
+        modifier = Modifier
+            .size(200.dp),
+        color = Color.Yellow,
+    )
 }
-
-@Composable
-fun StopRec() {
-    Text(text = "stop")
-}
-
-/*
-    val openDialog = remember { mutableStateOf(true) }
-
-    if (openDialog.value) {
-
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text(text = "Alert Dialog") },
-            text = { Text("Start Recording!") },
-            confirmButton = {
-                Button(modifier = Modifier.fillMaxWidth(),
-                    onClick = { openDialog.value = false }
-                ) {
-                    Text("Dismiss")
-                }
-            })
-    }
-*/
-
-
 
