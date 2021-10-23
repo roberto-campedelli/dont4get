@@ -1,10 +1,15 @@
 package com.example.dont4get
 
 import android.Manifest.permission.*
+import android.media.MediaRecorder
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,10 +24,16 @@ import androidx.compose.ui.unit.dp
 import com.example.dont4get.ui.theme.Dont4getTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import java.io.File
+import java.io.IOException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private val permissions = arrayListOf(RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE)
+private var recorder: MediaRecorder? = null
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalPermissionsApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +48,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Preview
 @Composable
@@ -46,8 +58,9 @@ fun RecButtonPreview() {
     }
 }
 
-enum class ButtonState { Pressed, Released }
+enum class ButtonState { Pressed, Released, Initial }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
 fun RecButton() {
@@ -80,10 +93,11 @@ fun myTopAppBar() {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
 fun FAB() {
-    var buttonState by remember { mutableStateOf(ButtonState.Released) }
+    var buttonState by remember { mutableStateOf(ButtonState.Initial) }
 
     FloatingActionButton(
         onClick = {},
@@ -111,10 +125,13 @@ fun FAB() {
                 )
             })
         if (buttonState == ButtonState.Pressed) {
+            Text(text = "$buttonState")
             StartRec()
             CircularRecProgress()
             LinearRecProgress()
-            Text(text = "$buttonState")
+        } else if (buttonState == ButtonState.Released) {
+            StopRec()
+            SaveMemo()
         }
     }
 }
@@ -139,18 +156,40 @@ fun LinearRecProgress() {
     )
 }
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
 fun StartRec() {
 
-    var context = LocalContext.current
+    val context = LocalContext.current
 
     val permissionsState = rememberMultiplePermissionsState(permissions)
     when {
         // If the camera permission is granted, then show screen with the feature enabled
         permissionsState.allPermissionsGranted -> {
             //start record
+
+            val mPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            val currentDate = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_DATE_TIME
+            val mFileName = File(mPath, currentDate.format(formatter) + ".3gp")
+            recorder = MediaRecorder()
+
+            recorder?.apply {
+                setAudioSource(MediaRecorder.AudioSource.MIC)
+                setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                setOutputFile(mFileName)
+            }
+            try {
+                recorder!!.prepare()
+            } catch (e: IOException) {
+                Log.e("Audio Record", "recorder failed to prepare")
+            }
+            Toast.makeText(context, "sto registrando", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, mFileName.toString(), Toast.LENGTH_SHORT).show()
+
+            recorder!!.start()
             Toast.makeText(context, "Camera permission Granted", Toast.LENGTH_SHORT).show()
         }
         // If the user denied the permission but a rationale should be shown, or the user sees
@@ -164,5 +203,64 @@ fun StartRec() {
             Toast.makeText(context, "GIVE ME THE POWER", Toast.LENGTH_SHORT).show()
         }
 
+    }
+}
+
+@Composable
+fun StopRec() {
+
+    val context = LocalContext.current
+
+    recorder?.stop()
+    recorder?.release()
+    recorder = null
+
+    Toast.makeText(context, "ho finito di registrare", Toast.LENGTH_SHORT).show()
+}
+
+
+@Composable
+fun SaveMemo() {
+    val openDialog = remember { mutableStateOf(true) }
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            title = {
+                Text(text = "Title")
+            },
+            text = {
+                Text(
+                    "This area typically contains the supportive text " +
+                            "which presents the details regarding the Dialog's purpose."
+                )
+            },
+            buttons = {
+                Row(
+                    modifier = Modifier.padding(all = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .weight(1f),
+                        onClick = { openDialog.value = false }
+                    ) {
+                        Text("Delete")
+                    }
+                    Button(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .weight(1f),
+                        onClick = { openDialog.value = false }
+                    ) {
+                        Text("Save")
+                    }
+
+                }
+            }
+        )
     }
 }
