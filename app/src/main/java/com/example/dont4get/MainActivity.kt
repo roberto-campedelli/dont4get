@@ -13,12 +13,17 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dont4get.ui.theme.Dont4getTheme
@@ -222,6 +227,7 @@ fun StopRec() {
 @Composable
 fun SaveMemo() {
     val openDialog = remember { mutableStateOf(true) }
+    var name by remember { mutableStateOf(TextFieldValue("")) }
 
     if (openDialog.value) {
         AlertDialog(
@@ -229,13 +235,25 @@ fun SaveMemo() {
                 openDialog.value = false
             },
             title = {
-                Text(text = "Title")
+                if (name.text.isNotEmpty()) {
+                    Text(
+                        text = name.text,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        style = MaterialTheme.typography.h5
+                    )
+                }
             },
             text = {
-                Text(
-                    "This area typically contains the supportive text " +
-                            "which presents the details regarding the Dialog's purpose."
-                )
+                Column {
+                    OutlinedTextField(
+                        value = name,
+                        label = { Text(text = "Enter Memo Name") },
+                        onValueChange = {
+                            name = it
+                        }
+                    )
+                    MemoRemind()
+                }
             },
             buttons = {
                 Row(
@@ -262,5 +280,38 @@ fun SaveMemo() {
                 }
             }
         )
+    }
+}
+
+@Composable
+fun MemoRemind() {
+
+    val radioOptions = listOf("Every Day", "Once per Week", "Just Once")
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
+
+    Column(Modifier.selectableGroup()) {
+        radioOptions.forEach { text ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .selectable(
+                        selected = (text == selectedOption),
+                        onClick = { onOptionSelected(text) },
+                        role = Role.RadioButton
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = (text == selectedOption),
+                    onClick = { }
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.body1.merge(),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
+            }
+        }
     }
 }
