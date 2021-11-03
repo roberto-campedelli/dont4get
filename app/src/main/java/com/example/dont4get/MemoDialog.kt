@@ -8,12 +8,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -31,20 +35,22 @@ fun SaveMemo() {
             onDismissRequest = {
                 openDialog.value = false
             },
-            title = {
-                if (name.text.isNotEmpty()) {
-                    Text(
-                        text = name.text,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        style = MaterialTheme.typography.h5
-                    )
-                }
-            },
+            //title = {
+            //  if (name.text.isNotEmpty()) {
+            //    Text(
+            //      text = name.text,
+            //    style = MaterialTheme.typography.h5
+            //)
+            // }
+            //},
             text = {
                 Column {
                     OutlinedTextField(
                         value = name,
-                        label = { Text(text = "Enter Memo Name") },
+                        label = { Text(text = "Remind me to...") },
+                        textStyle = TextStyle(
+                            fontSize = 20.sp
+                        ),
                         onValueChange = {
                             name = it
                         }
@@ -103,7 +109,7 @@ fun MemoRemind(): String {
         radioOptions.forEach { text ->
             Row(
                 Modifier
-                    .height(60.dp)
+                    .height(50.dp)
                     .selectable(
                         selected = (text == selectedOption),
                         onClick = { onOptionSelected(text) },
@@ -155,7 +161,7 @@ fun DatePicker() {
     month = calendar.get(Calendar.MONTH)
     day = calendar.get(Calendar.DAY_OF_MONTH)
 
-    var date by remember { mutableStateOf("Date") }
+    var date by remember { mutableStateOf("") }
     val dataPickerDialog = DatePickerDialog(
         context,
         { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
@@ -163,17 +169,21 @@ fun DatePicker() {
         }, year, month, day
     )
 
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        //Text(text = "Select Date: ${date}")
-        Spacer(modifier = Modifier.size(16.dp))
-        Button(
-            onClick = { dataPickerDialog.show() }
+        IconButton(
+            onClick = { dataPickerDialog.show() },
         ) {
-            Text(text = "${date}", fontSize = 20.sp)
+            Icon(
+                Icons.Filled.DateRange,
+                contentDescription = null,
+                modifier = Modifier.size(25.dp)
+            )
         }
+
+        Text(text = date, fontSize = 20.sp, modifier = Modifier.padding(3.dp))
 
     }
 }
@@ -191,25 +201,28 @@ fun TimePicker() {
     hour = calendar.get(Calendar.HOUR_OF_DAY)
     min = calendar.get(Calendar.MINUTE)
 
-    var time by remember { mutableStateOf("Time") }
+    var time by remember { mutableStateOf("") }
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hour: Int, min: Int ->
-            time = "$hour:$min"
+            time = "%02d:%02d".format(hour, min)
         }, hour, min, true
     )
 
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        //Text(text = "Select Date: ${date}")
-        Spacer(modifier = Modifier.size(16.dp))
-        Button(
-            onClick = { timePickerDialog.show() }
+        IconButton(
+            onClick = { timePickerDialog.show() },
         ) {
-            Text(text = "${time}", fontSize = 20.sp)
+            Icon(
+                Icons.Filled.Schedule,
+                contentDescription = null,
+                modifier = Modifier.size(25.dp)
+            )
         }
+        Text(text = time, fontSize = 20.sp, modifier = Modifier.padding(3.dp))
     }
 }
 
