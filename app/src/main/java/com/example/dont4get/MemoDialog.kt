@@ -3,6 +3,7 @@ package com.example.dont4get
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
@@ -22,10 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import java.util.*
 
 @Composable
-fun SaveMemo() {
+fun SaveMemo(memoItem: MemoItem) {
+    val context = LocalContext.current
+
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var reminderType by remember { mutableStateOf("") }
@@ -35,14 +39,6 @@ fun SaveMemo() {
             onDismissRequest = {
                 openDialog.value = false
             },
-            //title = {
-            //  if (name.text.isNotEmpty()) {
-            //    Text(
-            //      text = name.text,
-            //    style = MaterialTheme.typography.h5
-            //)
-            // }
-            //},
             text = {
                 Column {
                     OutlinedTextField(
@@ -80,7 +76,11 @@ fun SaveMemo() {
                         modifier = Modifier
                             .padding(10.dp)
                             .weight(1f),
-                        onClick = { openDialog.value = false }
+                        onClick = {
+                            openDialog.value = false
+                            memoItem.deleteFile()
+                            Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
+                        }
                     ) {
                         Text("Delete")
                     }
@@ -94,7 +94,8 @@ fun SaveMemo() {
                     }
 
                 }
-            }
+            },
+            properties = DialogProperties(false, false)
         )
     }
 }

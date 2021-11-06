@@ -99,6 +99,8 @@ fun myTopAppBar() {
 @Composable
 fun FAB() {
     var buttonState by remember { mutableStateOf(ButtonState.Initial) }
+    var fileName: File? = null
+    var memoItem: MemoItem?
 
     FloatingActionButton(
         onClick = {},
@@ -108,31 +110,32 @@ fun FAB() {
             .size(85.dp),
 
         ) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        buttonState = ButtonState.Pressed
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+                            buttonState = ButtonState.Pressed
 
-                        // Waits for the tap to release
-                        // before returning the call
-                        this.tryAwaitRelease()
+                            // Waits for the tap to release
+                            // before returning the call
+                            this.tryAwaitRelease()
 
-                        // Set the currentState to Release
-                        // to trigger Release animation
-                        buttonState = ButtonState.Released
-                    }
-                )
-            })
+                            // Set the currentState to Release
+                            // to trigger Release animation
+                            buttonState = ButtonState.Released
+                        }
+                    )
+                })
         if (buttonState == ButtonState.Pressed) {
             Text(text = "$buttonState")
-            StartRec()
+            fileName = StartRec()
             CircularRecProgress()
             LinearRecProgress()
         } else if (buttonState == ButtonState.Released) {
-            StopRec()
-            SaveMemo()
+            memoItem = StopRec(fileName!!)
+            SaveMemo(memoItem!!)
         }
     }
 }
@@ -160,9 +163,10 @@ fun LinearRecProgress() {
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
-fun StartRec() {
+fun StartRec(): File {
 
     val context = LocalContext.current
+    var fileName: File? = null
 
     val permissionsState = rememberMultiplePermissionsState(permissions)
     when {
@@ -173,14 +177,14 @@ fun StartRec() {
             val mPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
             val currentDate = LocalDateTime.now()
             val formatter = DateTimeFormatter.ISO_DATE_TIME
-            val mFileName = File(mPath, currentDate.format(formatter) + ".3gp")
+            fileName = File(mPath, currentDate.format(formatter) + ".3gp")
             recorder = MediaRecorder()
 
             recorder?.apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
                 setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
                 setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-                setOutputFile(mFileName)
+                setOutputFile(fileName)
             }
             try {
                 recorder!!.prepare()
@@ -188,10 +192,11 @@ fun StartRec() {
                 Log.e("Audio Record", "recorder failed to prepare")
             }
             Toast.makeText(context, "sto registrando", Toast.LENGTH_SHORT).show()
-            Toast.makeText(context, mFileName.toString(), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, fileName.toString(), Toast.LENGTH_SHORT).show()
 
             recorder!!.start()
-            Toast.makeText(context, "Camera permission Granted", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, "Camera permission Granted", Toast.LENGTH_SHORT).show()
+            //.fileName =
         }
         // If the user denied the permission but a rationale should be shown, or the user sees
         // the permission for the first time, explain why the feature is needed by the app and allow
@@ -201,14 +206,15 @@ fun StartRec() {
             LaunchedEffect(permissionsState) {
                 permissionsState.launchMultiplePermissionRequest()
             }
-            Toast.makeText(context, "GIVE ME THE POWER", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, "GIVE ME THE POWER", Toast.LENGTH_SHORT).show()
         }
 
     }
+    return fileName!!
 }
 
 @Composable
-fun StopRec() {
+fun StopRec(fileName: File): MemoItem {
 
     val context = LocalContext.current
 
@@ -217,6 +223,7 @@ fun StopRec() {
     recorder = null
 
     Toast.makeText(context, "ho finito di registrare", Toast.LENGTH_SHORT).show()
+    return MemoItem("UndefinedName", fileName, "UndefinedDate")
 }
 
 
