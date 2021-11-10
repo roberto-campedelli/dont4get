@@ -27,7 +27,7 @@ import androidx.compose.ui.window.DialogProperties
 import java.util.*
 
 @Composable
-fun SaveMemo(memoItem: MemoItem) {
+fun SaveMemo(memoItem: MemoItem, allMemos: MutableList<MemoItem>) {
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
@@ -88,7 +88,11 @@ fun SaveMemo(memoItem: MemoItem) {
                         modifier = Modifier
                             .padding(10.dp)
                             .weight(1f),
-                        onClick = { openDialog.value = false }
+                        onClick = {
+                            openDialog.value = false
+                            memoItem.name = name.text
+                            allMemos.add(memoItem)
+                        }
                     ) {
                         Text("Save")
                     }
@@ -135,21 +139,7 @@ fun MemoRemind(): String {
 }
 
 @Composable
-fun ReminderSwitch() {
-    var periodicReminder by remember { mutableStateOf(true) }
-    Row() {
-        Text(text = "Just once")
-        Switch(
-            checked = periodicReminder,
-            onCheckedChange = { periodicReminder = it }
-        )
-        Text(text = "Periodic")
-    }
-}
-
-
-@Composable
-fun DatePicker() {
+fun DatePicker(): String {
 
     val context = LocalContext.current
 
@@ -187,11 +177,12 @@ fun DatePicker() {
         Text(text = date, fontSize = 20.sp, modifier = Modifier.padding(3.dp))
 
     }
+    return date
 }
 
 
 @Composable
-fun TimePicker() {
+fun TimePicker(): String {
 
     val context = LocalContext.current
 
@@ -225,6 +216,7 @@ fun TimePicker() {
         }
         Text(text = time, fontSize = 20.sp, modifier = Modifier.padding(3.dp))
     }
+    return time
 }
 
 @Composable

@@ -4,15 +4,16 @@ import android.Manifest.permission.*
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -66,23 +67,16 @@ enum class ButtonState { Pressed, Released, Initial }
 @Composable
 fun RecButton() {
 
+    var allMemos = remember { mutableStateListOf<MemoItem>() }
+
     Scaffold(
         topBar = { myTopAppBar() },
-        floatingActionButton = { FAB() },
+        floatingActionButton = { FAB(allMemos = allMemos) },
         isFloatingActionButtonDocked = false,
         floatingActionButtonPosition = FabPosition.End,
-        //bottomBar = { BottomBar() },
-        //drawerContent = { Text(text = "Drawer Menu 1") },
-        content = { innerPadding ->
-            LazyColumn(contentPadding = innerPadding) {
-                items(count = 100) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    )
-                }
-            }
+        content = {
+            MemoList(allMemos = allMemos)
+
         }
     )
 }
@@ -97,7 +91,7 @@ fun myTopAppBar() {
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
-fun FAB() {
+fun FAB(allMemos: MutableList<MemoItem>) {
     var buttonState by remember { mutableStateOf(ButtonState.Initial) }
     var fileName: File? = null
     var memoItem: MemoItem?
@@ -135,7 +129,7 @@ fun FAB() {
             LinearRecProgress()
         } else if (buttonState == ButtonState.Released) {
             memoItem = StopRec(fileName!!)
-            SaveMemo(memoItem!!)
+            SaveMemo(memoItem!!, allMemos = allMemos)
         }
     }
 }
@@ -174,7 +168,8 @@ fun StartRec(): File {
         permissionsState.allPermissionsGranted -> {
             //start record
 
-            val mPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            val mPath = context.filesDir
+            //val mPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
             val currentDate = LocalDateTime.now()
             val formatter = DateTimeFormatter.ISO_DATE_TIME
             fileName = File(mPath, currentDate.format(formatter) + ".3gp")
