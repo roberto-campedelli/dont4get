@@ -27,7 +27,7 @@ import androidx.compose.ui.window.DialogProperties
 import java.util.*
 
 @Composable
-fun SaveMemo(memoItem: MemoItem, allMemos: MutableList<MemoItem>) {
+fun SaveMemo(memoItem: MemoItem) {
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
@@ -91,7 +91,7 @@ fun SaveMemo(memoItem: MemoItem, allMemos: MutableList<MemoItem>) {
                         onClick = {
                             openDialog.value = false
                             memoItem.name = name.text
-                            allMemos.add(memoItem)
+                            //allMemos.add(memoItem)
                         }
                     ) {
                         Text("Save")

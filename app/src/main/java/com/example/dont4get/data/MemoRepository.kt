@@ -1,16 +1,21 @@
 package com.example.dont4get.data
 
-import kotlinx.coroutines.flow.Flow
+import androidx.lifecycle.LiveData
 
 class MemoRepository(private val memoDao: MemoDao) {
 
-    val listAllMemo: Flow<Memo> = memoDao.listAll()
+    val readAllMemo: LiveData<List<Memo>> = memoDao.listAll()
 
-    fun addMemo(memo: Memo) {
+    suspend fun addMemo(memo: Memo) {
         memoDao.insert(memo)
     }
 
-    fun deleteMemo(memo: Memo) {
+    suspend fun deleteMemo(memo: Memo) {
         memoDao.delete(memo)
     }
+
+    suspend fun updateMemo(memo: Memo) {
+        memoDao.update(memo = memo)
+    }
+
 }

@@ -35,6 +35,8 @@ private val permissions = arrayListOf(RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ
 private var recorder: MediaRecorder? = null
 
 class MainActivity : ComponentActivity() {
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalPermissionsApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,15 +69,13 @@ enum class ButtonState { Pressed, Released, Initial }
 @Composable
 fun RecButton() {
 
-    var allMemos = remember { mutableStateListOf<MemoItem>() }
-
     Scaffold(
         topBar = { myTopAppBar() },
-        floatingActionButton = { FAB(allMemos = allMemos) },
+        floatingActionButton = { FAB() },
         isFloatingActionButtonDocked = false,
         floatingActionButtonPosition = FabPosition.End,
         content = {
-            MemoList(allMemos = allMemos)
+            MemoList()
 
         }
     )
@@ -91,7 +91,7 @@ fun myTopAppBar() {
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
-fun FAB(allMemos: MutableList<MemoItem>) {
+fun FAB() {
     var buttonState by remember { mutableStateOf(ButtonState.Initial) }
     var fileName: File? = null
     var memoItem: MemoItem?
@@ -129,7 +129,7 @@ fun FAB(allMemos: MutableList<MemoItem>) {
             LinearRecProgress()
         } else if (buttonState == ButtonState.Released) {
             memoItem = StopRec(fileName!!)
-            SaveMemo(memoItem!!, allMemos = allMemos)
+            SaveMemo(memoItem!!)
         }
     }
 }
