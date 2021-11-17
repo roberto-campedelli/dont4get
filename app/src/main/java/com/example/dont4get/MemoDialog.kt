@@ -24,10 +24,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import com.example.dont4get.data.Memo
+import com.example.dont4get.data.MemoViewModel
+import java.io.File
 import java.util.*
 
 @Composable
-fun SaveMemo(memoItem: MemoItem) {
+fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
@@ -55,14 +58,14 @@ fun SaveMemo(memoItem: MemoItem) {
                     when (reminderType) {
                         "Once" -> {
                             DatePicker()
-                            TimePicker()
+                            memo.date = TimePicker()
                         }
                         "Weekly" -> {
                             DayPicker()
-                            TimePicker()
+                            memo.date = TimePicker()
                         }
                         "Daily" -> {
-                            TimePicker()
+                            memo.date = TimePicker()
                         }
                     }
                 }
@@ -78,7 +81,8 @@ fun SaveMemo(memoItem: MemoItem) {
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
-                            memoItem.deleteFile()
+                            memoViewModel.deleteMemo(memo)
+                            file.delete()
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
                     ) {
@@ -90,8 +94,8 @@ fun SaveMemo(memoItem: MemoItem) {
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
-                            memoItem.name = name.text
-                            //allMemos.add(memoItem)
+                            memo.name = name.text
+                            memoViewModel.addMemo(memo)
                         }
                     ) {
                         Text("Save")

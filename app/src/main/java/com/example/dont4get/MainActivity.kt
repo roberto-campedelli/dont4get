@@ -1,6 +1,7 @@
 package com.example.dont4get
 
 import android.Manifest.permission.*
+import android.app.Application
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
@@ -16,12 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.dont4get.data.Memo
+import com.example.dont4get.data.MemoViewModel
+import com.example.dont4get.data.MemoViewModelFactory
 import com.example.dont4get.ui.theme.Dont4getTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -69,13 +75,19 @@ enum class ButtonState { Pressed, Released, Initial }
 @Composable
 fun RecButton() {
 
+    val context = LocalContext.current
+    val memoViewModel: MemoViewModel =
+        viewModel(factory = MemoViewModelFactory(context.applicationContext as Application))
+
+    val memos = memoViewModel.allMemo.observeAsState(listOf()).value
+
     Scaffold(
         topBar = { myTopAppBar() },
-        floatingActionButton = { FAB() },
+        floatingActionButton = { FAB(memoViewModel) },
         isFloatingActionButtonDocked = false,
         floatingActionButtonPosition = FabPosition.End,
         content = {
-            MemoList()
+            MemoList(memos)
 
         }
     )
@@ -91,10 +103,10 @@ fun myTopAppBar() {
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
-fun FAB() {
+fun FAB(memoViewModel: MemoViewModel) {
     var buttonState by remember { mutableStateOf(ButtonState.Initial) }
     var fileName: File? = null
-    var memoItem: MemoItem?
+    var memo: Memo
 
     FloatingActionButton(
         onClick = {},
@@ -127,9 +139,9 @@ fun FAB() {
             fileName = StartRec()
             CircularRecProgress()
             LinearRecProgress()
-        } else if (buttonState == ButtonState.Released) {
-            memoItem = StopRec(fileName!!)
-            SaveMemo(memoItem!!)
+        } else if (buttonState == ButtonState.Released && fileName != null) {
+            memo = StopRec(fileName!!)
+            SaveMemo(memo, fileName!!, memoViewModel)
         }
     }
 }
@@ -209,7 +221,7 @@ fun StartRec(): File {
 }
 
 @Composable
-fun StopRec(fileName: File): MemoItem {
+fun StopRec(fileName: File): Memo {
 
     val context = LocalContext.current
 
@@ -218,7 +230,7 @@ fun StopRec(fileName: File): MemoItem {
     recorder = null
 
     Toast.makeText(context, "ho finito di registrare", Toast.LENGTH_SHORT).show()
-    return MemoItem("UndefinedName", fileName, "UndefinedDate")
+    return Memo(fileName = fileName.toString(), name = "UndefinedName", date = "UndefinedDate")
 }
 
 
