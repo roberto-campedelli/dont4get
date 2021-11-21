@@ -88,7 +88,7 @@ fun RecButton() {
         isFloatingActionButtonDocked = false,
         floatingActionButtonPosition = FabPosition.End,
         content = {
-            MemoList(memos)
+            MemoList(memos, memoViewModel)
 
         }
     )
