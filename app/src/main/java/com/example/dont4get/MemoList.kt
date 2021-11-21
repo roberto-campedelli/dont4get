@@ -1,6 +1,7 @@
 package com.example.dont4get
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,18 +20,25 @@ fun MemoList(memos: List<Memo>) {
     LazyColumn() {
         items(memos) { memo ->
             Card(
-                elevation = 5.dp, modifier = Modifier
+                elevation = 5.dp,
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(10.dp)
+                    .padding(5.dp)
             ) {
-                Column() {
-                    Text(text = memo.fileName, modifier = Modifier.padding(10.dp))
-                    Text(text = memo.name, modifier = Modifier.padding(10.dp))
-                    Text(text = memo.date, modifier = Modifier.padding(10.dp))
-                }
+                Row() {
+                    Column() {
+                        Text(text = memo.name, modifier = Modifier.padding(10.dp))
+                        Text(text = memo.date, modifier = Modifier.padding(10.dp))
+                    }
 
+                    PlayButton(memo = memo)
+                }
             }
+
         }
     }
 }
+
+
+
 
