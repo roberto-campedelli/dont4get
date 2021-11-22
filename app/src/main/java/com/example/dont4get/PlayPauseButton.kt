@@ -2,6 +2,7 @@ package com.example.dont4get
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -16,8 +17,10 @@ import java.io.File
 import java.io.FileInputStream
 
 
+@ExperimentalAnimationApi
 @Composable
 fun PlayPauseButton(memo: Memo) {
+
 
     var player = MediaPlayer().apply {
         setAudioAttributes(
@@ -30,12 +33,13 @@ fun PlayPauseButton(memo: Memo) {
         prepare()
     }
 
-    PlayButton(memo = memo, player)
-    PauseButton(player)
+    PlayButton(player = player)
+    PauseButton(player = player)
+
 }
 
 @Composable
-fun PlayButton(memo: Memo, player: MediaPlayer) {
+fun PlayButton(player: MediaPlayer) {
 
     IconButton(
         onClick = {
@@ -68,4 +72,3 @@ fun PauseButton(player: MediaPlayer) {
 
     }
 }
-

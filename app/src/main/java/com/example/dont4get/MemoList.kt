@@ -1,5 +1,6 @@
 package com.example.dont4get
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,9 +15,9 @@ import androidx.compose.ui.unit.dp
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
 
+@ExperimentalAnimationApi
 @Composable
 fun MemoList(memos: List<Memo>, memoViewModel: MemoViewModel) {
-
 
     LazyColumn() {
         items(memos) { memo ->
