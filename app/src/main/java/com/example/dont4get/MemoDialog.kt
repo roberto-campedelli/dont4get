@@ -1,6 +1,7 @@
 package com.example.dont4get
 
 import android.app.DatePickerDialog
+import android.app.NotificationManager
 import android.app.TimePickerDialog
 import android.widget.DatePicker
 import android.widget.Toast
@@ -24,8 +25,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
+import com.example.dont4get.util.sendNotification
 import java.io.File
 import java.util.*
 
@@ -36,6 +39,11 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var reminderType by remember { mutableStateOf("") }
+    val notificationManager = ContextCompat.getSystemService(
+        context,
+        NotificationManager::class.java
+    ) as NotificationManager
+
 
     if (openDialog.value) {
         AlertDialog(
@@ -83,6 +91,7 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             openDialog.value = false
                             memoViewModel.deleteMemo(memo)
                             file.delete()
+                            notificationManager.sendNotification("ciao", context)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
                     ) {

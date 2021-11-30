@@ -2,6 +2,8 @@ package com.example.dont4get
 
 import android.Manifest.permission.*
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
@@ -11,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,17 +40,19 @@ import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
+const val CHANNEL_ID = "channel"
 private val permissions = arrayListOf(RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE)
 private var recorder: MediaRecorder? = null
 
 class MainActivity : ComponentActivity() {
 
-
+    @ExperimentalAnimationApi
     @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalPermissionsApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        createChannel(notificationManager = notificationManager)
         setContent() {
             Dont4getTheme {
                 // A surface container using the 'background' color from the theme
@@ -59,6 +64,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@ExperimentalAnimationApi
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Preview
@@ -71,6 +77,7 @@ fun RecButtonPreview() {
 
 enum class ButtonState { Pressed, Released, Initial }
 
+@ExperimentalAnimationApi
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalPermissionsApi
 @Composable
@@ -236,4 +243,19 @@ fun StopRec(fileName: File): Memo {
 }
 
 
+private fun createChannel(notificationManager: NotificationManager) {
+    // TODO: Step 1.6 START create a channel
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // Create the NotificationChannel
+        val name = "channel_name"
+        val descriptionText = "channel_description"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
+        mChannel.description = descriptionText
+        mChannel.enableLights(true)
+        mChannel.lightColor = android.graphics.Color.RED
+        mChannel.enableVibration(true)
+        notificationManager.createNotificationChannel(mChannel)
+    }
 
+}
