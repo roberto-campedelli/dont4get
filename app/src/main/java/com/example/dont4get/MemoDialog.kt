@@ -28,9 +28,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
-import com.example.dont4get.util.sendNotification
+import com.example.dont4get.util.scheduleOneTimeNotification
 import java.io.File
 import java.util.*
+
+//enum class reminderState { Once, Weekly, Daily }
+
 
 @Composable
 fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
@@ -91,7 +94,7 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             openDialog.value = false
                             memoViewModel.deleteMemo(memo)
                             file.delete()
-                            notificationManager.sendNotification("ciao", context)
+                            //notificationManager.sendNotification("ciao", context)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
                     ) {
@@ -105,6 +108,11 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             openDialog.value = false
                             memo.name = name.text
                             memoViewModel.addMemo(memo)
+                            if (reminderType == "Once") {
+
+                                scheduleOneTimeNotification(10000, context)
+
+                            }
                         }
                     ) {
                         Text("Save")

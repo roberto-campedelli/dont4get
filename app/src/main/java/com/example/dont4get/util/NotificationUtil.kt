@@ -5,9 +5,16 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.example.dont4get.CHANNEL_ID
 import com.example.dont4get.MainActivity
 import com.example.dont4get.R
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 private val NOTIFICATION_ID = 0
 private val FLAGS = 0
@@ -52,3 +59,37 @@ fun NotificationManager.sendNotification(message: String, applicationContext: Co
 fun NotificationManager.cancelNotifications() {
     cancelAll()
 }
+
+
+class OneTimeScheduleWorker(
+    val context: Context,
+    workerParams: WorkerParameters
+) : Worker(context, workerParams) {
+
+    override fun doWork(): Result {
+
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setContentTitle("Scheduled notification")
+            .setContentText("Hello from one-time worker!")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        with(NotificationManagerCompat.from(context)) {
+            notify(Random.nextInt(), builder.build())
+        }
+
+        return Result.success()
+    }
+
+}
+
+fun scheduleOneTimeNotification(initialDelay: Long, context: Context) {
+    val work =
+        OneTimeWorkRequestBuilder<OneTimeScheduleWorker>()
+            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+            .build()
+
+    WorkManager.getInstance(context).enqueue(work)
+}
+
