@@ -46,10 +46,16 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var reminderType by remember { mutableStateOf("") }
+    //todo: add time validation disabling the save button if time is not valid
+    var savingButtonState by remember {
+        mutableStateOf(true)
+    }
     val notificationManager = ContextCompat.getSystemService(
         context,
         NotificationManager::class.java
     ) as NotificationManager
+
+
 
 
     if (openDialog.value) {
@@ -97,7 +103,6 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             openDialog.value = false
                             memoViewModel.deleteMemo(memo)
                             file.delete()
-                            //notificationManager.sendNotification("ciao", context)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
                     ) {
@@ -112,13 +117,11 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             memo.name = name.text
                             memoViewModel.addMemo(memo)
                             if (reminderType == "Once") {
-                                //todo date and time different management
-                                Toast.makeText(context, memo.date, Toast.LENGTH_LONG).show()
                                 val delay = getNotificationDelay(memo.date)
-                                Toast.makeText(context, delay.toString(), Toast.LENGTH_LONG).show()
                                 scheduleOneTimeNotification(delay, context)
                             }
-                        }
+                        },
+                        enabled = savingButtonState
                     ) {
                         Text("Save")
                     }
@@ -173,24 +176,21 @@ fun DatePicker(): String {
     val month: Int
     val day: Int
 
-    /*  val localDate = LocalDate.now()
-      year = localDate.year
-      month = localDate.monthValue
-      Log.i("MONTH", month.toString())
-      day = localDate.dayOfMonth*/
-
     val calendar = Calendar.getInstance()
     year = calendar.get(Calendar.YEAR)
     month = calendar.get(Calendar.MONTH)
     day = calendar.get(Calendar.DAY_OF_MONTH)
 
     var date by remember { mutableStateOf("") }
-    val dataPickerDialog = DatePickerDialog(
+
+    var dataPickerDialog = DatePickerDialog(
         context,
         { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
             date = "%4d/%02d/%02d".format(year, month + 1, dayOfMonth)
         }, year, month, day
     )
+
+    dataPickerDialog.datePicker.minDate = calendar.time.time
 
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -209,6 +209,7 @@ fun DatePicker(): String {
         Text(text = date, fontSize = 20.sp, modifier = Modifier.padding(3.dp))
 
     }
+
     return date
 }
 
@@ -232,6 +233,7 @@ fun TimePicker(): String {
             time = "%02d:%02d".format(hour, min)
         }, hour, min, true
     )
+
 
     Row(
         horizontalArrangement = Arrangement.Center,
