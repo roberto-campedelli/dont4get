@@ -3,8 +3,10 @@ package com.example.dont4get
 import android.app.DatePickerDialog
 import android.app.NotificationManager
 import android.app.TimePickerDialog
+import android.os.Build
 import android.widget.DatePicker
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
@@ -28,6 +30,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
+import com.example.dont4get.util.getNotificationDelay
 import com.example.dont4get.util.scheduleOneTimeNotification
 import java.io.File
 import java.util.*
@@ -35,6 +38,7 @@ import java.util.*
 //enum class reminderState { Once, Weekly, Daily }
 
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     val context = LocalContext.current
@@ -68,8 +72,7 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                     reminderType = MemoRemind()
                     when (reminderType) {
                         "Once" -> {
-                            DatePicker()
-                            memo.date = TimePicker()
+                            memo.date = DatePicker() + "-" + TimePicker()
                         }
                         "Weekly" -> {
                             DayPicker()
@@ -109,9 +112,11 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             memo.name = name.text
                             memoViewModel.addMemo(memo)
                             if (reminderType == "Once") {
-
-                                scheduleOneTimeNotification(10000, context)
-
+                                //todo date and time different management
+                                Toast.makeText(context, memo.date, Toast.LENGTH_LONG).show()
+                                val delay = getNotificationDelay(memo.date)
+                                Toast.makeText(context, delay.toString(), Toast.LENGTH_LONG).show()
+                                scheduleOneTimeNotification(delay, context)
                             }
                         }
                     ) {
@@ -168,6 +173,12 @@ fun DatePicker(): String {
     val month: Int
     val day: Int
 
+    /*  val localDate = LocalDate.now()
+      year = localDate.year
+      month = localDate.monthValue
+      Log.i("MONTH", month.toString())
+      day = localDate.dayOfMonth*/
+
     val calendar = Calendar.getInstance()
     year = calendar.get(Calendar.YEAR)
     month = calendar.get(Calendar.MONTH)
@@ -177,7 +188,7 @@ fun DatePicker(): String {
     val dataPickerDialog = DatePickerDialog(
         context,
         { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-            date = "$dayOfMonth/$month/$year"
+            date = "%4d/%02d/%02d".format(year, month + 1, dayOfMonth)
         }, year, month, day
     )
 

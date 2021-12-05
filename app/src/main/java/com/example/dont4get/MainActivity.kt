@@ -47,7 +47,7 @@ private var recorder: MediaRecorder? = null
 class MainActivity : ComponentActivity() {
 
     @ExperimentalAnimationApi
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.S)
     @ExperimentalPermissionsApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @ExperimentalAnimationApi
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.S)
 @ExperimentalPermissionsApi
 @Preview
 @Composable
@@ -78,7 +78,7 @@ fun RecButtonPreview() {
 enum class ButtonState { Pressed, Released, Initial }
 
 @ExperimentalAnimationApi
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.S)
 @ExperimentalPermissionsApi
 @Composable
 fun RecButton() {
@@ -108,7 +108,7 @@ fun myTopAppBar() {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.S)
 @ExperimentalPermissionsApi
 @Composable
 fun FAB(memoViewModel: MemoViewModel) {

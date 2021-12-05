@@ -87,9 +87,11 @@ class OneTimeScheduleWorker(
 fun scheduleOneTimeNotification(initialDelay: Long, context: Context) {
     val work =
         OneTimeWorkRequestBuilder<OneTimeScheduleWorker>()
-            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+            .setInitialDelay(initialDelay, TimeUnit.SECONDS)
             .build()
 
     WorkManager.getInstance(context).enqueue(work)
 }
+
+
 
