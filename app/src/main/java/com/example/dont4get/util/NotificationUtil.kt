@@ -6,10 +6,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.example.dont4get.CHANNEL_ID
 import com.example.dont4get.MainActivity
 import com.example.dont4get.R
@@ -93,5 +90,26 @@ fun scheduleOneTimeNotification(initialDelay: Long, context: Context) {
     WorkManager.getInstance(context).enqueue(work)
 }
 
+fun schedulePeriodicNotifications(initialDelay: Long, context: Context) {
 
+    val periodicWork =
+        PeriodicWorkRequestBuilder<OneTimeScheduleWorker>(
+            7, TimeUnit.DAYS
+        )
+            .build()
 
+    WorkManager.getInstance(context)
+        .enqueueUniquePeriodicWork(
+            "periodic_work",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            periodicWork
+        )
+}
+
+fun setWeeklyMemos(delays: List<Long>, context: Context) {
+
+    for (delay in delays) {
+        schedulePeriodicNotifications(delay, context)
+    }
+
+}

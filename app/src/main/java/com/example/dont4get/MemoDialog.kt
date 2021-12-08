@@ -1,7 +1,6 @@
 package com.example.dont4get
 
 import android.app.DatePickerDialog
-import android.app.NotificationManager
 import android.app.TimePickerDialog
 import android.os.Build
 import android.widget.DatePicker
@@ -27,11 +26,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
+import com.example.dont4get.util.getDelayFromDaysAndTime
 import com.example.dont4get.util.getNotificationDelay
 import com.example.dont4get.util.scheduleOneTimeNotification
+import com.example.dont4get.util.setWeeklyMemos
 import java.io.File
 import java.util.*
 
@@ -46,17 +46,11 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var reminderType by remember { mutableStateOf("") }
+    lateinit var choosenDays: List<Boolean>
     //todo: add time validation disabling the save button if time is not valid
     var savingButtonState by remember {
         mutableStateOf(true)
     }
-    val notificationManager = ContextCompat.getSystemService(
-        context,
-        NotificationManager::class.java
-    ) as NotificationManager
-
-
-
 
     if (openDialog.value) {
         AlertDialog(
@@ -81,7 +75,7 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             memo.date = DatePicker() + "-" + TimePicker()
                         }
                         "Weekly" -> {
-                            DayPicker()
+                            choosenDays = DayPicker()
                             memo.date = TimePicker()
                         }
                         "Daily" -> {
@@ -119,6 +113,13 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             if (reminderType == "Once") {
                                 val delay = getNotificationDelay(memo.date)
                                 scheduleOneTimeNotification(delay, context)
+                            } else if (reminderType == "Weekly") {
+                                setWeeklyMemos(
+                                    getDelayFromDaysAndTime(
+                                        choosenDays = choosenDays,
+                                        memo.date
+                                    ), context
+                                )
                             }
                         },
                         enabled = savingButtonState
@@ -254,7 +255,7 @@ fun TimePicker(): String {
 }
 
 @Composable
-fun DayPicker() {
+fun DayPicker(): List<Boolean> {
 
     var mon by remember { mutableStateOf(false) }
     var tue by remember { mutableStateOf(false) }
@@ -341,7 +342,9 @@ fun DayPicker() {
                 fontSize = if (sun) checkedSize else uncheckedSize,
                 fontWeight = FontWeight.Bold
             )
-
         }
     }
+
+    return listOf<Boolean>(mon, tue, wed, thu, fri, sun, sat)
+
 }
