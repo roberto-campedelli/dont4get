@@ -278,7 +278,11 @@ fun DayPicker(): List<Boolean> {
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        IconToggleButton(checked = mon, onCheckedChange = { mon = it }) {
+        IconToggleButton(
+            checked = mon, onCheckedChange = { mon = it }, modifier = Modifier.weight(
+                0.143F
+            )
+        ) {
             val tint by animateColorAsState(if (mon) checkedColor else uncheckedColor)
             Text(
                 text = dayNameListEng[0],
@@ -288,7 +292,11 @@ fun DayPicker(): List<Boolean> {
             )
 
         }
-        IconToggleButton(checked = tue, onCheckedChange = { tue = it }) {
+        IconToggleButton(
+            checked = tue, onCheckedChange = { tue = it }, modifier = Modifier.weight(
+                0.143F
+            )
+        ) {
             val tint by animateColorAsState(if (tue) checkedColor else uncheckedColor)
             Text(
                 text = dayNameListEng[1],
@@ -298,7 +306,11 @@ fun DayPicker(): List<Boolean> {
             )
 
         }
-        IconToggleButton(checked = wed, onCheckedChange = { wed = it }) {
+        IconToggleButton(
+            checked = wed, onCheckedChange = { wed = it }, modifier = Modifier.weight(
+                0.143F
+            )
+        ) {
             val tint by animateColorAsState(if (wed) checkedColor else uncheckedColor)
             Text(
                 text = dayNameListEng[2],
@@ -308,7 +320,11 @@ fun DayPicker(): List<Boolean> {
             )
 
         }
-        IconToggleButton(checked = thu, onCheckedChange = { thu = it }) {
+        IconToggleButton(
+            checked = thu, onCheckedChange = { thu = it }, modifier = Modifier.weight(
+                0.143F
+            )
+        ) {
             val tint by animateColorAsState(if (thu) checkedColor else uncheckedColor)
             Text(
                 text = dayNameListEng[3],
@@ -318,7 +334,11 @@ fun DayPicker(): List<Boolean> {
             )
 
         }
-        IconToggleButton(checked = fri, onCheckedChange = { fri = it }) {
+        IconToggleButton(
+            checked = fri, onCheckedChange = { fri = it }, modifier = Modifier.weight(
+                0.143F
+            )
+        ) {
             val tint by animateColorAsState(if (fri) checkedColor else uncheckedColor)
             Text(
                 text = dayNameListEng[4],
@@ -328,7 +348,11 @@ fun DayPicker(): List<Boolean> {
             )
 
         }
-        IconToggleButton(checked = sat, onCheckedChange = { sat = it }) {
+        IconToggleButton(
+            checked = sat, onCheckedChange = { sat = it }, modifier = Modifier.weight(
+                0.143F
+            )
+        ) {
             val tint by animateColorAsState(if (sat) checkedColor else uncheckedColor)
             Text(
                 text = dayNameListEng[5],
@@ -338,7 +362,11 @@ fun DayPicker(): List<Boolean> {
             )
 
         }
-        IconToggleButton(checked = sun, onCheckedChange = { sun = it }) {
+        IconToggleButton(
+            checked = sun, onCheckedChange = { sun = it }, modifier = Modifier.weight(
+                0.143F
+            )
+        ) {
             val tint by animateColorAsState(if (sun) checkedColor else uncheckedColor)
             Text(
                 text = dayNameListEng[6],
