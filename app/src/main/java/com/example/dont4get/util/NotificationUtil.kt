@@ -95,7 +95,7 @@ fun schedulePeriodicNotifications(initialDelay: Long, context: Context) {
     val periodicWork =
         PeriodicWorkRequestBuilder<OneTimeScheduleWorker>(
             7, TimeUnit.DAYS
-        )
+        ).setInitialDelay(initialDelay, TimeUnit.SECONDS)
             .build()
 
     WorkManager.getInstance(context)

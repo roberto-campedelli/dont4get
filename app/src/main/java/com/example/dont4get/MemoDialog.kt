@@ -273,7 +273,11 @@ fun DayPicker(): List<Boolean> {
 
     val dayNameListEng = listOf("M", "T", "W", "T", "F", "S", "S")
 
-    Row() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
         IconToggleButton(checked = mon, onCheckedChange = { mon = it }) {
             val tint by animateColorAsState(if (mon) checkedColor else uncheckedColor)
             Text(
@@ -345,6 +349,6 @@ fun DayPicker(): List<Boolean> {
         }
     }
 
-    return listOf<Boolean>(mon, tue, wed, thu, fri, sun, sat)
+    return listOf<Boolean>(false, mon, tue, wed, thu, fri, sun, sat)
 
 }
