@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 class MemoViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -24,7 +25,11 @@ class MemoViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteMemo(memo: Memo) {
         viewModelScope.launch(Dispatchers.IO) {
+            // delete the memo from the db
             repository.deleteMemo(memo)
+            //delete the file from the storage
+            val file = File(memo.fileName)
+            file.delete()
         }
     }
 

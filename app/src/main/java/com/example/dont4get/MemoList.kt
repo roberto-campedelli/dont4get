@@ -11,6 +11,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
@@ -18,6 +19,8 @@ import com.example.dont4get.data.MemoViewModel
 @ExperimentalAnimationApi
 @Composable
 fun MemoList(memos: List<Memo>, memoViewModel: MemoViewModel) {
+
+    val context = LocalContext.current
 
     LazyColumn() {
         items(memos) { memo ->
@@ -35,7 +38,7 @@ fun MemoList(memos: List<Memo>, memoViewModel: MemoViewModel) {
 
                     PlayPauseButton(memo = memo)
 
-                    DeleteButton(memo = memo, memoViewModel = memoViewModel)
+                    DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
 
                 }
             }

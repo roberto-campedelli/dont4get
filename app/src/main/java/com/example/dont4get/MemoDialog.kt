@@ -7,6 +7,7 @@ import android.widget.DatePicker
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -28,14 +29,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
-import com.example.dont4get.util.getDelayFromDaysAndTime
-import com.example.dont4get.util.getNotificationDelay
-import com.example.dont4get.util.scheduleOneTimeNotification
-import com.example.dont4get.util.setWeeklyMemos
+import com.example.dont4get.util.*
 import java.io.File
 import java.util.*
 
 //enum class reminderState { Once, Weekly, Daily }
+
+fun validateName(name: TextFieldValue): Boolean {
+    return name.text.isNotBlank()
+}
 
 
 @RequiresApi(Build.VERSION_CODES.S)
@@ -46,11 +48,9 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var reminderType by remember { mutableStateOf("") }
-    lateinit var choosenDays: List<Boolean>
-    //todo: add time validation disabling the save button if time is not valid
-    var savingButtonState by remember {
-        mutableStateOf(true)
-    }
+    lateinit var chosenDays: List<Boolean>
+    var saveButtonEnabled by remember { mutableStateOf(false) }
+
 
     if (openDialog.value) {
         AlertDialog(
@@ -65,17 +65,24 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                         textStyle = TextStyle(
                             fontSize = 20.sp
                         ),
+                        singleLine = true,
                         onValueChange = {
                             name = it
+                            saveButtonEnabled = validateName(name = name)
                         }
                     )
                     reminderType = MemoRemind()
                     when (reminderType) {
                         "Once" -> {
-                            memo.date = DatePicker() + "-" + TimePicker()
+                            val date = DatePicker()
+                            val time = if (date.isNotBlank()) {
+                                TimePickerWithValidation(date = date)
+                            } else TimePicker()
+                            memo.date = "$date-$time"
+                            //memo.date = DatePicker() + "-" + TimePicker()
                         }
                         "Weekly" -> {
-                            choosenDays = DayPicker()
+                            chosenDays = DayPicker()
                             memo.date = TimePicker()
                         }
                         "Daily" -> {
@@ -96,7 +103,6 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                         onClick = {
                             openDialog.value = false
                             memoViewModel.deleteMemo(memo)
-                            file.delete()
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
                     ) {
@@ -112,17 +118,18 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             memoViewModel.addMemo(memo)
                             if (reminderType == "Once") {
                                 val delay = getNotificationDelay(memo.date)
-                                scheduleOneTimeNotification(delay, context)
+                                scheduleOneTimeNotification(delay, context, memo.name)
                             } else if (reminderType == "Weekly") {
                                 setWeeklyMemos(
                                     getDelayFromDaysAndTime(
-                                        choosenDays = choosenDays,
-                                        memo.date
-                                    ), context
+                                        choosenDays = chosenDays,
+                                        memo.date,
+                                    ), context, memoName = memo.name
                                 )
                             }
                         },
-                        enabled = savingButtonState
+                        enabled = saveButtonEnabled
+
                     ) {
                         Text("Save")
                     }
@@ -207,7 +214,12 @@ fun DatePicker(): String {
             )
         }
 
-        Text(text = date, fontSize = 20.sp, modifier = Modifier.padding(3.dp))
+        Text(
+            text = date,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .padding(3.dp)
+                .clickable { dataPickerDialog.show() })
 
     }
 
@@ -249,8 +261,74 @@ fun TimePicker(): String {
                 modifier = Modifier.size(25.dp)
             )
         }
-        Text(text = time, fontSize = 20.sp, modifier = Modifier.padding(3.dp))
+        Text(
+            text = time,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .padding(3.dp)
+                .clickable { timePickerDialog.show() })
     }
+    return time
+}
+
+@Composable
+fun TimePickerWithValidation(date: String): String {
+
+    val context = LocalContext.current
+
+    val timeNotValidColor = Color(0xFFF44336)
+    val timeValidColor = Color(0xFF4f4f4f)
+    var isTimeValid by remember { mutableStateOf(true) }
+
+    val hour: Int
+    val min: Int
+
+    val calendar = Calendar.getInstance()
+    hour = calendar.get(Calendar.HOUR_OF_DAY)
+    min = calendar.get(Calendar.MINUTE)
+
+    var time by remember { mutableStateOf("") }
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _, hour: Int, min: Int ->
+            time = "%02d:%02d".format(hour, min)
+        }, hour, min, true
+    )
+
+    if (time.isNotBlank()) {
+        if (!isDateAndTimeValid(dateAndTime = "$date-$time")) {
+            isTimeValid = false
+            Toast.makeText(
+                context,
+                "Unfortunately you can't go back in time, pick a valid date!",
+                Toast.LENGTH_LONG
+            ).show()
+        } else
+            isTimeValid = true
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = { timePickerDialog.show() },
+        ) {
+            Icon(
+                Icons.Filled.Schedule,
+                contentDescription = null,
+                modifier = Modifier.size(25.dp)
+            )
+        }
+        Text(
+            text = time,
+            fontSize = 20.sp,
+            color = if (isTimeValid) timeValidColor else timeNotValidColor,
+            modifier = Modifier
+                .padding(3.dp)
+                .clickable { timePickerDialog.show() })
+    }
+
     return time
 }
 

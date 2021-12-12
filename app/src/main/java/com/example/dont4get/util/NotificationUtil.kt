@@ -81,16 +81,16 @@ class OneTimeScheduleWorker(
 
 }
 
-fun scheduleOneTimeNotification(initialDelay: Long, context: Context) {
+fun scheduleOneTimeNotification(initialDelay: Long, context: Context, memoName: String) {
     val work =
         OneTimeWorkRequestBuilder<OneTimeScheduleWorker>()
             .setInitialDelay(initialDelay, TimeUnit.SECONDS)
             .build()
 
-    WorkManager.getInstance(context).enqueue(work)
+    WorkManager.getInstance(context).enqueueUniqueWork(memoName, ExistingWorkPolicy.REPLACE, work)
 }
 
-fun schedulePeriodicNotifications(initialDelay: Long, context: Context) {
+fun schedulePeriodicNotifications(initialDelay: Long, context: Context, memoName: String) {
 
     val periodicWork =
         PeriodicWorkRequestBuilder<OneTimeScheduleWorker>(
@@ -100,16 +100,20 @@ fun schedulePeriodicNotifications(initialDelay: Long, context: Context) {
 
     WorkManager.getInstance(context)
         .enqueueUniquePeriodicWork(
-            "periodic_work",
+            memoName,
             ExistingPeriodicWorkPolicy.REPLACE,
             periodicWork
         )
 }
 
-fun setWeeklyMemos(delays: List<Long>, context: Context) {
+fun setWeeklyMemos(delays: List<Long>, context: Context, memoName: String) {
 
     for (delay in delays) {
-        schedulePeriodicNotifications(delay, context)
+        schedulePeriodicNotifications(delay, context, memoName = memoName)
     }
 
+}
+
+fun cancelNotification(context: Context, memoName: String) {
+    WorkManager.getInstance(context).cancelUniqueWork(memoName)
 }

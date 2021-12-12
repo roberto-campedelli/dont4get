@@ -1,5 +1,6 @@
 package com.example.dont4get
 
+import android.content.Context
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -10,13 +11,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
-import java.io.File
+import com.example.dont4get.util.cancelNotification
 
 @Composable
-fun DeleteButton(memo: Memo, memoViewModel: MemoViewModel) {
+fun DeleteButton(memo: Memo, memoViewModel: MemoViewModel, context: Context) {
 
     IconButton(
-        onClick = { delete(memo, memoViewModel = memoViewModel) },
+        onClick = {
+            memoViewModel.deleteMemo(memo)
+            cancelNotification(context = context, memo.name)
+        },
         modifier = Modifier.padding(5.dp)
     ) {
         Icon(
@@ -25,14 +29,5 @@ fun DeleteButton(memo: Memo, memoViewModel: MemoViewModel) {
         )
 
     }
-
-}
-
-private fun delete(memo: Memo, memoViewModel: MemoViewModel) {
-
-    val file = File(memo.fileName)
-    file.delete()
-
-    memoViewModel.deleteMemo(memo)
 
 }
