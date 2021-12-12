@@ -377,6 +377,6 @@ fun DayPicker(): List<Boolean> {
         }
     }
 
-    return listOf<Boolean>(false, mon, tue, wed, thu, fri, sun, sat)
+    return listOf(mon, tue, wed, thu, fri, sat, sun)
 
 }

@@ -56,6 +56,7 @@ fun getDelayFromDaysAndTime(choosenDays: List<Boolean>, time: String): List<Long
 
     val targetTime = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME)
     Log.i("targetTime: ", targetTime.toString())
+    Log.i("choosenDays: ", choosenDays.toString())
     val now = LocalDateTime.now()
     val currentDay = now.dayOfWeek.value
     val targetDateTimes = mutableListOf<LocalDateTime>()
@@ -69,7 +70,7 @@ fun getDelayFromDaysAndTime(choosenDays: List<Boolean>, time: String): List<Long
         var targetDateTime = LocalDateTime.of(LocalDate.now(), targetTime)
         if (day) {
             // i need to check if the day choosed is already passed in the week or not
-            dayIndex = choosenDays.indexOf(day)
+            dayIndex = choosenDays.indexOf(day) + 1
             Log.i("targetDayIndex: ", dayIndex.toString())
             Log.i("currentDay: ", currentDay.toString())
             if ((dayIndex > currentDay) || (dayIndex == currentDay && targetDateTime.isBefore(now))) {

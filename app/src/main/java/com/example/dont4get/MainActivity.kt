@@ -7,7 +7,6 @@ import android.app.NotificationManager
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -188,17 +187,17 @@ fun StartRec(): File {
         permissionsState.allPermissionsGranted -> {
             //start record
 
-            //val mPath = context.filesDir
-            val mPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            val mPath = context.filesDir
+            //val mPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
             val currentDate = LocalDateTime.now()
             val formatter = DateTimeFormatter.ISO_DATE_TIME
-            fileName = File(mPath, currentDate.format(formatter) + ".3gp")
+            fileName = File(mPath, currentDate.format(formatter) + ".opus")
             recorder = MediaRecorder()
 
             recorder?.apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
-                setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-                setAudioEncoder(MediaRecorder.AudioEncoder.AAC_ELD)
+                setOutputFormat(MediaRecorder.OutputFormat.OGG)
+                setAudioEncoder(MediaRecorder.AudioEncoder.OPUS)
                 setOutputFile(fileName)
             }
             try {
