@@ -352,9 +352,11 @@ fun DayPicker(): List<Boolean> {
     val dayNameListEng = listOf("M", "T", "W", "T", "F", "S", "S")
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 5.dp),
         verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.Center
     ) {
         IconToggleButton(
             checked = mon, onCheckedChange = { mon = it }, modifier = Modifier.weight(

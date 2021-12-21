@@ -2,6 +2,7 @@ package com.example.dont4get
 
 import android.Manifest.permission.*
 import android.app.Application
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.media.MediaRecorder
@@ -173,7 +174,7 @@ fun LinearRecProgress() {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
 @Composable
 fun StartRec(): File {
@@ -243,18 +244,17 @@ fun StopRec(fileName: File): Memo {
 
 
 private fun createChannel(notificationManager: NotificationManager) {
-    // TODO: Step 1.6 START create a channel
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // Create the NotificationChannel
-        val name = "channel_name"
-        val descriptionText = "channel_description"
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
-        mChannel.description = descriptionText
-        mChannel.enableLights(true)
-        mChannel.lightColor = android.graphics.Color.RED
-        mChannel.enableVibration(true)
-        notificationManager.createNotificationChannel(mChannel)
-    }
+    // Create the NotificationChannel
+    val name = "Reminder Notification"
+    val descriptionText = "Reminder Notification"
+    val importance = NotificationManager.IMPORTANCE_HIGH
+    val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
+    mChannel.description = descriptionText
+    mChannel.enableLights(true)
+    mChannel.lightColor = android.graphics.Color.RED
+    mChannel.enableVibration(true)
+    mChannel.setShowBadge(true)
+    mChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+    notificationManager.createNotificationChannel(mChannel)
 
 }
