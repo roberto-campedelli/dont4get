@@ -2,6 +2,7 @@ package com.example.dont4get
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,8 @@ import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
 import java.io.File
 import java.io.FileInputStream
+import java.time.LocalTime
+import java.util.concurrent.TimeUnit
 
 @ExperimentalAnimationApi
 @Composable
@@ -52,22 +55,55 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
         )
         setDataSource(FileInputStream(File(memo.fileName)).fd)
         prepare()
+
     }
 
-    val audioProgress by remember {
-        mutableStateOf(Int)
-    }
+
     //TODO calculate duration e current position of the media player
-    //val duration = player.duration
+    val duration = player.duration.toLong()
 
-    //val audioDuration = LocalTime.of(TimeUnit.MILLISECONDS.toHours(duration),TimeUnit.MILLISECONDS.toHours(duration),TimeUnit.MILLISECONDS.toHours(duration))
+    val audioDuration = LocalTime.of(
+        //TimeUnit.MILLISECONDS.toHours(duration).toInt(),
+        TimeUnit.MILLISECONDS.toMinutes(duration).toInt(),
+        TimeUnit.MILLISECONDS.toSeconds(duration).toInt()
+    )
+    var audioProgress = LocalTime.of(
+        TimeUnit.MILLISECONDS.toMinutes(0).toInt(),
+        TimeUnit.MILLISECONDS.toSeconds(0).toInt()
+    )
 
-/*
-    if(player.isPlaying){
-        while (audioProgress < audioDuration){
 
-        }
+    while (player.isPlaying && player.currentPosition < player.duration) {
+        Log.i("audioProgress", player.currentPosition.toString())
     }
+    val position = player.currentPosition.toLong()
+    audioProgress = LocalTime.of(
+        TimeUnit.MILLISECONDS.toMinutes(position).toInt(),
+        TimeUnit.MILLISECONDS.toSeconds(position).toInt()
+    )
+
+    //todo inserisci progress bar e tasti per andare avanti e indietro!
+
+    //Todo - fix this multithreading solution
+    /*
+    Thread {
+        try {
+            while (player.currentPosition < player.duration) {
+                //seekbar.setProgress(mp.getCurrentPosition())
+                val millis: Int = player.currentPosition
+                Log.i("audioProgress", millis.toString())
+                try {
+                    Thread.sleep(100)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                    println("interrupt exeption$e")
+                }
+            } // end while
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("my Exception$e")
+        }
+    }.start()
 */
 
     Card(
@@ -89,12 +125,14 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
                 Text(text = memo.name, modifier = Modifier)
                 Text(text = memo.date, modifier = Modifier)
 
+                Text(text = audioDuration.toString())
+                Text(text = player.currentPosition.toString())
+
             }
 
             PlayPauseButton(player = player)
-            //Text(text = audioDuration.toString())
-            //Text(text = audioProgress.toString())
-            //DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
+
+            DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
 
         }
     }
