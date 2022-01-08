@@ -1,17 +1,16 @@
 package com.example.dont4get
 
+import android.annotation.SuppressLint
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconToggleButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -25,8 +24,6 @@ import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
 import java.io.File
 import java.io.FileInputStream
-import java.time.LocalTime
-import java.util.concurrent.TimeUnit
 
 @ExperimentalAnimationApi
 @Composable
@@ -44,9 +41,13 @@ fun MemoList(memos: List<Memo>, memoViewModel: MemoViewModel) {
 fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
 
     val context = LocalContext.current
+    var position by remember {
+        mutableStateOf(0L)
+    }
 
+    var progress by remember { mutableStateOf(0.1f) }
 
-    var player = MediaPlayer().apply {
+    val player = MediaPlayer().apply {
         setAudioAttributes(
             AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
@@ -57,54 +58,6 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
         prepare()
 
     }
-
-
-    //TODO calculate duration e current position of the media player
-    val duration = player.duration.toLong()
-
-    val audioDuration = LocalTime.of(
-        //TimeUnit.MILLISECONDS.toHours(duration).toInt(),
-        TimeUnit.MILLISECONDS.toMinutes(duration).toInt(),
-        TimeUnit.MILLISECONDS.toSeconds(duration).toInt()
-    )
-    var audioProgress = LocalTime.of(
-        TimeUnit.MILLISECONDS.toMinutes(0).toInt(),
-        TimeUnit.MILLISECONDS.toSeconds(0).toInt()
-    )
-
-
-    while (player.isPlaying && player.currentPosition < player.duration) {
-        Log.i("audioProgress", player.currentPosition.toString())
-    }
-    val position = player.currentPosition.toLong()
-    audioProgress = LocalTime.of(
-        TimeUnit.MILLISECONDS.toMinutes(position).toInt(),
-        TimeUnit.MILLISECONDS.toSeconds(position).toInt()
-    )
-
-    //todo inserisci progress bar e tasti per andare avanti e indietro!
-
-    //Todo - fix this multithreading solution
-    /*
-    Thread {
-        try {
-            while (player.currentPosition < player.duration) {
-                //seekbar.setProgress(mp.getCurrentPosition())
-                val millis: Int = player.currentPosition
-                Log.i("audioProgress", millis.toString())
-                try {
-                    Thread.sleep(100)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                    println("interrupt exeption$e")
-                }
-            } // end while
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("my Exception$e")
-        }
-    }.start()
-*/
 
     Card(
         elevation = 10.dp,
@@ -125,14 +78,13 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
                 Text(text = memo.name, modifier = Modifier)
                 Text(text = memo.date, modifier = Modifier)
 
-                Text(text = audioDuration.toString())
-                Text(text = player.currentPosition.toString())
-
             }
 
             PlayPauseButton(player = player)
 
             DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
+
+            //PlayerProgressBar(player = player)
 
         }
     }
@@ -142,13 +94,19 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
 @Composable
 fun PlayPauseButton(player: MediaPlayer) {
 
-
     var checked by remember { mutableStateOf(true) }
+
+    var progress by remember {
+        mutableStateOf(0F)
+    }
+    val duration = player.duration.toFloat()
+    progress = (player.currentPosition.toFloat() - 0) / (duration)
+    Log.i("audioProgress", progress.toString())
+
 
     player.setOnCompletionListener {
         checked = !checked // finish current activity
     }
-
 
     IconToggleButton(checked = checked, onCheckedChange = {
         checked = it
@@ -156,6 +114,9 @@ fun PlayPauseButton(player: MediaPlayer) {
             player.pause()
         } else {
             player.start()
+            Log.i("audioProgress1", player.currentPosition.toString())
+            /// todo: call a suspended function to update the current position
+            //GlobalScope.launch { getCurrentPosition(player = player) }
         }
     }, modifier = Modifier.padding(10.dp)) {
         val tint by animateColorAsState(if (checked) Color(0xFF46EC40) else Color(0xFFB0BEC5))
@@ -174,42 +135,19 @@ fun PlayPauseButton(player: MediaPlayer) {
         }
     }
 
+    PlayerProgressBar(progress = progress)
 }
 
-//TODO to decide: add or not the control to the speed of the audio
-/*
+//TODO - inserisci progress bar e tasti per andare avanti e indietro!
+
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun SpeedUpAudioButton(player: MediaPlayer) {
+fun PlayerProgressBar(progress: Float) {
 
-    var controlEnabled by remember {
-        mutableStateOf(true)
-    }
-    while (player.isPlaying)
-    controlEnabled = true
-
-    TextButton(onClick = {
-        val speed = player.playbackParams.speed
-        player.playbackParams.speed = speed + 0.25F
-    }, enabled = controlEnabled) {
-        Text("faster")
-    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
+    )
+    LinearProgressIndicator(progress = animatedProgress)
+    Spacer(Modifier.requiredHeight(30.dp))
 }
-
-@Composable
-fun SlowDownAudioButton(player: MediaPlayer) {
-
-    var controlEnabled by remember {
-        mutableStateOf(true)
-    }
-    while (player.isPlaying)
-        controlEnabled = true
-
-    TextButton(onClick = {
-        val speed = player.playbackParams.speed
-        player.playbackParams.speed = speed - 0.25F
-    }, enabled = controlEnabled) {
-        Text("slower")
-    }
-
-}
-*/
