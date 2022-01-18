@@ -39,7 +39,6 @@ fun validateName(name: TextFieldValue): Boolean {
     return name.text.isNotBlank()
 }
 
-
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
@@ -74,19 +73,19 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                     reminderType = MemoRemind()
                     when (reminderType) {
                         "Once" -> {
-                            val date = DatePicker()
+                            val date = DatePicker("")
                             val time = if (date.isNotBlank()) {
                                 TimePickerWithValidation(date = date)
-                            } else TimePicker()
+                            } else TimePicker("")
                             memo.date = "$date-$time"
                             //memo.date = DatePicker() + "-" + TimePicker()
                         }
                         "Weekly" -> {
                             chosenDays = DayPicker()
-                            memo.date = TimePicker()
+                            memo.date = TimePicker("")
                         }
                         "Daily" -> {
-                            memo.date = TimePicker()
+                            memo.date = TimePicker("")
                         }
                     }
                 }
@@ -141,6 +140,114 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
+@Composable
+fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDialogInfoStatus {
+    val context = LocalContext.current
+
+    val openDialog = remember { mutableStateOf(true) }
+    var name by remember { mutableStateOf(TextFieldValue("")) }
+    var reminderType by remember { mutableStateOf("") }
+    lateinit var chosenDays: List<Boolean>
+    var saveButtonEnabled by remember { mutableStateOf(false) }
+
+    var memoDialogInfoStatus by remember {
+        mutableStateOf(
+            MemoDialogInfoStatus.show
+        )
+    }
+
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+                memoDialogInfoStatus = MemoDialogInfoStatus.hide
+            },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = name,
+                        label = { Text(text = memo.name) },
+                        textStyle = TextStyle(
+                            fontSize = 20.sp
+                        ),
+                        singleLine = true,
+                        onValueChange = {
+                            name = it
+                            saveButtonEnabled = validateName(name = name)
+                        }
+                    )
+                    reminderType = MemoRemind()
+                    when (reminderType) {
+                        "Once" -> {
+                            val date = DatePicker(memo.date)
+                            val time = if (date.isNotBlank()) {
+                                TimePickerWithValidation(date = date)
+                            } else TimePicker(memo.date)
+                            memo.date = "$date-$time"
+                        }
+                        "Weekly" -> {
+                            chosenDays = DayPicker()
+                            memo.date = TimePicker(memo.date)
+                        }
+                        "Daily" -> {
+                            memo.date = TimePicker(memo.date)
+                        }
+                    }
+                }
+            },
+            buttons = {
+                Row(
+                    modifier = Modifier.padding(all = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .weight(1f),
+                        onClick = {
+                            openDialog.value = false
+                            memoViewModel.deleteMemo(memo)
+                            Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Text("Delete")
+                    }
+                    Button(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .weight(1f),
+                        onClick = {
+                            openDialog.value = false
+                            memo.name = name.text
+                            memoViewModel.addMemo(memo)
+                            if (reminderType == "Once") {
+                                val delay = getNotificationDelay(memo.date)
+                                scheduleOneTimeNotification(delay, context, memo.name)
+                            } else if (reminderType == "Weekly") {
+                                setWeeklyMemos(
+                                    getDelayFromDaysAndTime(
+                                        choosenDays = chosenDays,
+                                        memo.date,
+                                    ), context, memoName = memo.name
+                                )
+                            }
+                        },
+                        enabled = saveButtonEnabled
+
+                    ) {
+                        Text("Save")
+                    }
+
+                }
+            },
+            //properties = DialogProperties(false, false)
+        )
+    }
+    return memoDialogInfoStatus
+}
+
+
 @Composable
 fun MemoRemind(): String {
 
@@ -176,7 +283,7 @@ fun MemoRemind(): String {
 }
 
 @Composable
-fun DatePicker(): String {
+fun DatePicker(date: String): String {
 
     val context = LocalContext.current
 
@@ -189,7 +296,7 @@ fun DatePicker(): String {
     month = calendar.get(Calendar.MONTH)
     day = calendar.get(Calendar.DAY_OF_MONTH)
 
-    var date by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf(date) }
 
     var dataPickerDialog = DatePickerDialog(
         context,
@@ -228,7 +335,7 @@ fun DatePicker(): String {
 
 
 @Composable
-fun TimePicker(): String {
+fun TimePicker(time: String): String {
 
     val context = LocalContext.current
 
@@ -239,7 +346,7 @@ fun TimePicker(): String {
     hour = calendar.get(Calendar.HOUR_OF_DAY)
     min = calendar.get(Calendar.MINUTE)
 
-    var time by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf(time) }
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hour: Int, min: Int ->

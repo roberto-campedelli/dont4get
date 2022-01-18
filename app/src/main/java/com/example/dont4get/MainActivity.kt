@@ -46,6 +46,7 @@ private var recorder: MediaRecorder? = null
 
 class MainActivity : ComponentActivity() {
 
+    @ExperimentalMaterialApi
     @ExperimentalAnimationApi
     @RequiresApi(Build.VERSION_CODES.S)
     @ExperimentalPermissionsApi
@@ -64,6 +65,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @RequiresApi(Build.VERSION_CODES.S)
 @ExperimentalPermissionsApi
@@ -77,6 +79,7 @@ fun RecButtonPreview() {
 
 enum class ButtonState { Pressed, Released, Initial }
 
+@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @RequiresApi(Build.VERSION_CODES.S)
 @ExperimentalPermissionsApi

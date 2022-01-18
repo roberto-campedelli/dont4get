@@ -2,6 +2,8 @@ package com.example.dont4get
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -14,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +28,8 @@ import com.example.dont4get.data.MemoViewModel
 import java.io.File
 import java.io.FileInputStream
 
+@ExperimentalMaterialApi
+@RequiresApi(Build.VERSION_CODES.S)
 @ExperimentalAnimationApi
 @Composable
 fun MemoList(memos: List<Memo>, memoViewModel: MemoViewModel) {
@@ -37,10 +42,20 @@ fun MemoList(memos: List<Memo>, memoViewModel: MemoViewModel) {
     }
 }
 
+enum class MemoDialogInfoStatus { hide, show }
+
+@ExperimentalMaterialApi
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
 
     val context = LocalContext.current
+
+    var memoDialogInfoStatus by remember {
+        mutableStateOf(
+            MemoDialogInfoStatus.hide
+        )
+    }
 
     val player = MediaPlayer().apply {
         setAudioAttributes(
@@ -51,10 +66,10 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
         )
         setDataSource(FileInputStream(File(memo.fileName)).fd)
         prepare()
-
     }
 
     Card(
+        onClick = { memoDialogInfoStatus = MemoDialogInfoStatus.show },
         elevation = 10.dp,
         modifier = Modifier
             .fillMaxSize()
@@ -72,29 +87,40 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
             ) {
                 Text(text = memo.name, modifier = Modifier)
                 Text(text = memo.date, modifier = Modifier)
-
             }
 
             PlayPauseButton(player = player)
+            //DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
+        }
 
-            DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
-
+        if (memoDialogInfoStatus == MemoDialogInfoStatus.show) {
+            memoDialogInfoStatus = ShowUpdateMemo(
+                memo = memo,
+                file = File(memo.fileName),
+                memoViewModel = memoViewModel
+            )
         }
     }
-
 }
 
 @Composable
 fun PlayPauseButton(player: MediaPlayer) {
 
-    var checked by remember { mutableStateOf(true) }
-
-    var progress by remember {
+    var checked by rememberSaveable { mutableStateOf(true) }
+    var progress by rememberSaveable {
         mutableStateOf(0F)
     }
+    var position by rememberSaveable {
+        mutableStateOf(0)
+    }
+    var playerState by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    playerState = player.isPlaying
+    position = player.currentPosition
 
     val duration = player.duration.toFloat()
-
     progress = (player.currentPosition.toFloat() - 0) / (duration)
 
     player.setOnCompletionListener {
@@ -125,47 +151,29 @@ fun PlayPauseButton(player: MediaPlayer) {
         }
     }
 
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
-    )
+/*    Column() {
+        Text(text = progress.toString())
+        Text(text = playerState.toString())
+        Text(text = position.toString())
+        Spacer(Modifier.requiredHeight(10.dp))
 
-    Column() {
-        LinearProgressIndicator(progress = animatedProgress)
-
-        Spacer(Modifier.requiredHeight(30.dp))
-
-        MyIndicator(indicatorProgress = progress, duration = duration.toInt())
-    }
-
-
+        MyIndicator(indicatorProgress = progress)
+    }*/
 }
 
 //TODO - inserisci progress bar e tasti per andare avanti e indietro!
 
 @Composable
-fun PlayerProgressBar(progress: Float) {
+fun MyIndicator(indicatorProgress: Float) {
 
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
-    )
-    LinearProgressIndicator(progress = animatedProgress)
-    Spacer(Modifier.requiredHeight(30.dp))
-}
-
-@Composable
-fun MyIndicator(indicatorProgress: Float, duration: Int) {
-    var progress by remember { mutableStateOf(0f) }
-    val progressAnimDuration = duration
     val progressAnimation by animateFloatAsState(
-        targetValue = indicatorProgress
+        targetValue = indicatorProgress,
+        visibilityThreshold = 0.01f
     )
     LinearProgressIndicator(
         modifier = Modifier
-            .fillMaxWidth()
+            .wrapContentWidth()
             .clip(RoundedCornerShape(20.dp)), // Rounded edges
         progress = progressAnimation
     )
-
 }
