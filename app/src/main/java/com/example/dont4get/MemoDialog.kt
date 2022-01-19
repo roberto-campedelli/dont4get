@@ -70,7 +70,8 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             saveButtonEnabled = validateName(name = name)
                         }
                     )
-                    reminderType = MemoRemind()
+                    reminderType = MemoRemind(memoType = memo.type)
+                    memo.type = reminderType
                     when (reminderType) {
                         "Once" -> {
                             val date = DatePicker("")
@@ -146,10 +147,10 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
-    var name by remember { mutableStateOf(TextFieldValue("")) }
-    var reminderType by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf(TextFieldValue(memo.name)) }
+    var reminderType by remember { mutableStateOf(memo.type) }
     lateinit var chosenDays: List<Boolean>
-    var saveButtonEnabled by remember { mutableStateOf(false) }
+    var saveButtonEnabled by remember { mutableStateOf(true) }
 
     var memoDialogInfoStatus by remember {
         mutableStateOf(
@@ -167,7 +168,7 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                 Column {
                     OutlinedTextField(
                         value = name,
-                        label = { Text(text = memo.name) },
+                        //label = { Text(text = memo.name) },
                         textStyle = TextStyle(
                             fontSize = 20.sp
                         ),
@@ -177,20 +178,18 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                             saveButtonEnabled = validateName(name = name)
                         }
                     )
-                    reminderType = MemoRemind()
+                    reminderType = MemoRemind(memoType = memo.type)
+                    memo.type = reminderType
                     when (reminderType) {
                         "Once" -> {
-                            val date = DatePicker(memo.date)
+                            val date = DatePicker(memo.date.substring(0, memo.date.indexOf("-")))
                             val time = if (date.isNotBlank()) {
                                 TimePickerWithValidation(date = date)
-                            } else TimePicker(memo.date)
+                            } else TimePicker(memo.date.substring(memo.date.indexOf("-")) + 1)
                             memo.date = "$date-$time"
                         }
                         "Weekly" -> {
                             chosenDays = DayPicker()
-                            memo.date = TimePicker(memo.date)
-                        }
-                        "Daily" -> {
                             memo.date = TimePicker(memo.date)
                         }
                     }
@@ -236,7 +235,7 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                         enabled = saveButtonEnabled
 
                     ) {
-                        Text("Save")
+                        Text("Update")
                     }
 
                 }
@@ -249,10 +248,14 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
 
 
 @Composable
-fun MemoRemind(): String {
+fun MemoRemind(memoType: String): String {
 
-    val radioOptions = listOf("Once", "Weekly", "Daily")
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
+    val radioOptions = listOf("Once", "Weekly")
+    var initialValue = radioOptions[0]
+    if (memoType in radioOptions) {
+        initialValue = memoType
+    }
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(initialValue) }
 
     Row(Modifier.selectableGroup()) {
         radioOptions.forEach { text ->
@@ -327,7 +330,6 @@ fun DatePicker(date: String): String {
             modifier = Modifier
                 .padding(3.dp)
                 .clickable { dataPickerDialog.show() })
-
     }
 
     return date

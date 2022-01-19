@@ -242,7 +242,12 @@ fun StopRec(fileName: File): Memo {
     recorder = null
 
     Toast.makeText(context, "ho finito di registrare", Toast.LENGTH_SHORT).show()
-    return Memo(fileName = fileName.toString(), name = "UndefinedName", date = "UndefinedDate")
+    return Memo(
+        fileName = fileName.toString(),
+        name = "UndefinedName",
+        date = "UndefinedDate",
+        type = "UndefinedType"
+    )
 }
 
 
