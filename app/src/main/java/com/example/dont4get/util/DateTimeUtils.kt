@@ -19,8 +19,8 @@ fun getNotificationDelay(dateAndTime: String): Long {
 
 // from string 2011/12/03-10:15 to LocalDateTime '2011-12-03T10:15:30'
 fun fromStringToDateTime(dateAndTime: String): LocalDateTime {
-    // io receive the date in this format '2011/12/03-10:15'
-    //i put the date in this format '2011-12-03T10:15:30'
+    // i receive the date in this format '2011/12/03-10:15'
+    //i put the date in this format '2011-12-03T10:15:00'
     val newDateAndTime = dateAndTime.trim().plus(":00").replace("-", "T").replace("/", "-")
     return LocalDateTime.parse(newDateAndTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 }

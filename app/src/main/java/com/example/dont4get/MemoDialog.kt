@@ -76,7 +76,7 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                         "Once" -> {
                             val date = DatePicker("")
                             val time = if (date.isNotBlank()) {
-                                TimePickerWithValidation(date = date)
+                                TimePickerWithValidation(date = date, time = "")
                             } else TimePicker("")
                             memo.date = "$date-$time"
                             //memo.date = DatePicker() + "-" + TimePicker()
@@ -184,8 +184,11 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                         "Once" -> {
                             val date = DatePicker(memo.date.substring(0, memo.date.indexOf("-")))
                             val time = if (date.isNotBlank()) {
-                                TimePickerWithValidation(date = date)
-                            } else TimePicker(memo.date.substring(memo.date.indexOf("-")) + 1)
+                                TimePickerWithValidation(
+                                    date = date,
+                                    time = memo.date.substring(memo.date.indexOf("-") + 1)
+                                )
+                            } else TimePicker(memo.date.substring(memo.date.indexOf("-") + 1))
                             memo.date = "$date-$time"
                         }
                         "Weekly" -> {
@@ -206,6 +209,7 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
+                            memoDialogInfoStatus = MemoDialogInfoStatus.hide
                             memoViewModel.deleteMemo(memo)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
@@ -218,8 +222,9 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
+                            memoDialogInfoStatus = MemoDialogInfoStatus.hide
                             memo.name = name.text
-                            memoViewModel.addMemo(memo)
+                            memoViewModel.updateMemo(memo)
                             if (reminderType == "Once") {
                                 val delay = getNotificationDelay(memo.date)
                                 scheduleOneTimeNotification(delay, context, memo.name)
@@ -381,7 +386,7 @@ fun TimePicker(time: String): String {
 }
 
 @Composable
-fun TimePickerWithValidation(date: String): String {
+fun TimePickerWithValidation(date: String, time: String): String {
 
     val context = LocalContext.current
 
@@ -396,7 +401,7 @@ fun TimePickerWithValidation(date: String): String {
     hour = calendar.get(Calendar.HOUR_OF_DAY)
     min = calendar.get(Calendar.MINUTE)
 
-    var time by remember { mutableStateOf("") }
+    var time by remember { mutableStateOf(time) }
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hour: Int, min: Int ->
