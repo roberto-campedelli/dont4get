@@ -79,7 +79,6 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                                 TimePickerWithValidation(date = date, time = "")
                             } else TimePicker("")
                             memo.date = "$date-$time"
-                            //memo.date = DatePicker() + "-" + TimePicker()
                         }
                         "Weekly" -> {
                             chosenDays = DayPicker()
@@ -164,8 +163,14 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                 openDialog.value = false
                 memoDialogInfoStatus = MemoDialogInfoStatus.hide
             },
+            title = {
+                Text(text = "")
+            },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.wrapContentSize(),
+                    verticalArrangement = Arrangement.Bottom
+                ) {
                     OutlinedTextField(
                         value = name,
                         textStyle = TextStyle(
@@ -177,10 +182,11 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                             saveButtonEnabled = validateName(name = name)
                         }
                     )
-                    reminderType = MemoRemind(memoType = memo.type)
+                    //reminderType = MemoRemind(memoType = memo.type)
                     memo.type = reminderType
                     when (reminderType) {
                         "Once" -> {
+                            // if i want a OnceMemo i need the exact date - year/month/day/hour/minute/seconds
                             val date = DatePicker(memo.date.substring(0, memo.date.indexOf("-")))
                             val time = if (date.isNotBlank()) {
                                 TimePickerWithValidation(
@@ -188,10 +194,14 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                                     time = memo.date.substring(memo.date.indexOf("-") + 1)
                                 )
                             } else TimePicker(memo.date.substring(memo.date.indexOf("-") + 1))
+                            // in the case of OnceMemo the memo.date field contains the date and the time in the format year/month/day-hour:minute
                             memo.date = "$date-$time"
                         }
                         "Weekly" -> {
+                            // if i want a WeeklyMemo i need the day of the week when i want to be
+                            //notified and the time
                             chosenDays = DayPicker()
+                            // in the case of WeeklyMemo the memo.date field contains only the time in the format hour:minute
                             memo.date = TimePicker(memo.date)
                         }
                     }
@@ -199,12 +209,12 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
             },
             buttons = {
                 Row(
-                    modifier = Modifier.padding(all = 8.dp),
+                    modifier = Modifier.padding(all = 5.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Button(
                         modifier = Modifier
-                            .padding(10.dp)
+                            .padding(15.dp, 0.dp, 15.dp, 15.dp)
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
@@ -218,11 +228,13 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                     }
                     Button(
                         modifier = Modifier
-                            .padding(10.dp)
+                            .padding(15.dp, 0.dp, 15.dp, 15.dp)
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
                             memoDialogInfoStatus = MemoDialogInfoStatus.hide
+                            //if i change the name of the memo i need to delete the notification
+                            //about the previous memo and after that i can update the name
                             if (memo.name != name.text)
                                 cancelNotification(context = context, memoName = memo.name)
                             memo.name = name.text
@@ -335,7 +347,7 @@ fun DatePicker(date: String): String {
             text = date,
             fontSize = 20.sp,
             modifier = Modifier
-                .padding(3.dp)
+                .padding(top = 3.dp)
                 .clickable { dataPickerDialog.show() })
     }
 
@@ -381,7 +393,7 @@ fun TimePicker(time: String): String {
             text = time,
             fontSize = 20.sp,
             modifier = Modifier
-                .padding(3.dp)
+                .padding(top = 3.dp)
                 .clickable { timePickerDialog.show() })
     }
     return time
@@ -441,7 +453,7 @@ fun TimePickerWithValidation(date: String, time: String): String {
             fontSize = 20.sp,
             color = if (isTimeValid) timeValidColor else timeNotValidColor,
             modifier = Modifier
-                .padding(3.dp)
+                .padding(top = 3.dp)
                 .clickable { timePickerDialog.show() })
     }
 
@@ -470,7 +482,7 @@ fun DayPicker(): List<Boolean> {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 5.dp),
+            .padding(start = 5.dp, top = 5.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.Center
     ) {

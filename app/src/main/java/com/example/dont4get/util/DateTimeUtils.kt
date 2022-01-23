@@ -37,7 +37,7 @@ fun isDateAndTimeValid(dateAndTime: String): Boolean {
     return fromStringToDateTime(dateAndTime = dateAndTime).isAfter(LocalDateTime.now())
 }
 
-// function to get the right delay from the list of choosen days and the time
+// function to get the right delay from the list of chosen days and the time
 fun getDelayFromDaysAndTime(choosenDays: List<Boolean>, time: String): List<Long> {
 
     val targetTime = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME)

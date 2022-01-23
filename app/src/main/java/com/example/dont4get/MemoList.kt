@@ -87,6 +87,7 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
             ) {
                 Text(text = memo.name, modifier = Modifier)
                 Text(text = memo.date, modifier = Modifier)
+                Text(text = memo.type, modifier = Modifier)
             }
 
             PlayPauseButton(player = player)
