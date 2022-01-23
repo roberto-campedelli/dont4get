@@ -51,7 +51,6 @@ fun scheduleOneTimeNotification(initialDelay: Long, context: Context, memoName: 
             .setInputData(data)
             .build()
 
-
     WorkManager.getInstance(context).enqueueUniqueWork(memoName, ExistingWorkPolicy.REPLACE, work)
 }
 

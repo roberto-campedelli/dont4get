@@ -168,7 +168,6 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                 Column {
                     OutlinedTextField(
                         value = name,
-                        //label = { Text(text = memo.name) },
                         textStyle = TextStyle(
                             fontSize = 20.sp
                         ),
@@ -210,6 +209,7 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                         onClick = {
                             openDialog.value = false
                             memoDialogInfoStatus = MemoDialogInfoStatus.hide
+                            cancelNotification(context = context, memo.name)
                             memoViewModel.deleteMemo(memo)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
@@ -223,6 +223,8 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                         onClick = {
                             openDialog.value = false
                             memoDialogInfoStatus = MemoDialogInfoStatus.hide
+                            if (memo.name != name.text)
+                                cancelNotification(context = context, memoName = memo.name)
                             memo.name = name.text
                             memoViewModel.updateMemo(memo)
                             if (reminderType == "Once") {
