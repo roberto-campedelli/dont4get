@@ -41,13 +41,13 @@ fun validateName(name: TextFieldValue): Boolean {
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
+fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var reminderType by remember { mutableStateOf("") }
-    lateinit var chosenDays: List<Boolean>
+    var chosenDays by remember { mutableStateOf(fromStringToBooleanDayList(memo.days)) }
     var saveButtonEnabled by remember { mutableStateOf(false) }
 
 
@@ -81,7 +81,8 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             memo.date = "$date-$time"
                         }
                         "Weekly" -> {
-                            chosenDays = DayPicker()
+                            chosenDays = DayPicker(chosenDays)
+                            memo.days = fromBooleanDayListToString(chosenDays = chosenDays)
                             memo.date = TimePicker("")
                         }
                         "Daily" -> {
@@ -115,6 +116,7 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             openDialog.value = false
                             memo.name = name.text
                             memoViewModel.addMemo(memo)
+                            Toast.makeText(context, memo.days, Toast.LENGTH_SHORT).show()
                             if (reminderType == "Once") {
                                 val delay = getNotificationDelay(memo.date)
                                 scheduleOneTimeNotification(delay, context, memo.name)
@@ -142,18 +144,19 @@ fun SaveMemo(memo: Memo, file: File, memoViewModel: MemoViewModel) {
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDialogInfoStatus {
+fun ShowUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStatus {
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue(memo.name)) }
-    var reminderType by remember { mutableStateOf(memo.type) }
-    lateinit var chosenDays: List<Boolean>
+    val reminderType by remember { mutableStateOf(memo.type) }
+    var chosenDays by remember { mutableStateOf(fromStringToBooleanDayList(memo.days)) }
+    Toast.makeText(context, chosenDays.toString(), Toast.LENGTH_SHORT).show()
     var saveButtonEnabled by remember { mutableStateOf(true) }
 
     var memoDialogInfoStatus by remember {
         mutableStateOf(
-            MemoDialogInfoStatus.show
+            MemoDialogInfoStatus.SHOW
         )
     }
 
@@ -161,7 +164,7 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
         AlertDialog(
             onDismissRequest = {
                 openDialog.value = false
-                memoDialogInfoStatus = MemoDialogInfoStatus.hide
+                memoDialogInfoStatus = MemoDialogInfoStatus.HIDE
             },
             title = {
                 Text(text = "")
@@ -200,7 +203,8 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                         "Weekly" -> {
                             // if i want a WeeklyMemo i need the day of the week when i want to be
                             //notified and the time
-                            chosenDays = DayPicker()
+                            chosenDays = DayPicker(chosenDays)
+                            Toast.makeText(context, "$chosenDays!", Toast.LENGTH_SHORT).show()
                             // in the case of WeeklyMemo the memo.date field contains only the time in the format hour:minute
                             memo.date = TimePicker(memo.date)
                         }
@@ -218,7 +222,7 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
-                            memoDialogInfoStatus = MemoDialogInfoStatus.hide
+                            memoDialogInfoStatus = MemoDialogInfoStatus.HIDE
                             cancelNotification(context = context, memo.name)
                             memoViewModel.deleteMemo(memo)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
@@ -232,13 +236,17 @@ fun ShowUpdateMemo(memo: Memo, file: File, memoViewModel: MemoViewModel): MemoDi
                             .weight(1f),
                         onClick = {
                             openDialog.value = false
-                            memoDialogInfoStatus = MemoDialogInfoStatus.hide
+                            memoDialogInfoStatus = MemoDialogInfoStatus.HIDE
                             //if i change the name of the memo i need to delete the notification
                             //about the previous memo and after that i can update the name
                             if (memo.name != name.text)
                                 cancelNotification(context = context, memoName = memo.name)
                             memo.name = name.text
+                            Toast.makeText(context, "${chosenDays}?", Toast.LENGTH_SHORT).show()
+                            memo.days = fromBooleanDayListToString(chosenDays = chosenDays)
+                            Toast.makeText(context, "${memo.days}?", Toast.LENGTH_SHORT).show()
                             memoViewModel.updateMemo(memo)
+                            Toast.makeText(context, memo.days, Toast.LENGTH_SHORT).show()
                             if (reminderType == "Once") {
                                 val delay = getNotificationDelay(memo.date)
                                 scheduleOneTimeNotification(delay, context, memo.name)
@@ -461,15 +469,23 @@ fun TimePickerWithValidation(date: String, time: String): String {
 }
 
 @Composable
-fun DayPicker(): List<Boolean> {
+fun DayPicker(daysList: List<Boolean>): List<Boolean> {
 
-    var mon by remember { mutableStateOf(false) }
+    /*var mon by remember { mutableStateOf(false) }
     var tue by remember { mutableStateOf(false) }
     var wed by remember { mutableStateOf(false) }
     var thu by remember { mutableStateOf(false) }
     var fri by remember { mutableStateOf(false) }
     var sat by remember { mutableStateOf(false) }
-    var sun by remember { mutableStateOf(false) }
+    var sun by remember { mutableStateOf(false) }*/
+
+    var mon by remember { mutableStateOf(daysList[0]) }
+    var tue by remember { mutableStateOf(daysList[1]) }
+    var wed by remember { mutableStateOf(daysList[2]) }
+    var thu by remember { mutableStateOf(daysList[3]) }
+    var fri by remember { mutableStateOf(daysList[4]) }
+    var sat by remember { mutableStateOf(daysList[5]) }
+    var sun by remember { mutableStateOf(daysList[6]) }
 
     val checkedColor = Color(0xFF03DAC5)
     val uncheckedColor = Color(0xFFB0BEC5)

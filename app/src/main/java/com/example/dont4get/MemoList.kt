@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
+import com.example.dont4get.util.fromStringToBooleanDayList
 import java.io.File
 import java.io.FileInputStream
 
@@ -42,7 +43,7 @@ fun MemoList(memos: List<Memo>, memoViewModel: MemoViewModel) {
     }
 }
 
-enum class MemoDialogInfoStatus { hide, show }
+enum class MemoDialogInfoStatus { HIDE, SHOW }
 
 @ExperimentalMaterialApi
 @RequiresApi(Build.VERSION_CODES.S)
@@ -53,7 +54,7 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
 
     var memoDialogInfoStatus by remember {
         mutableStateOf(
-            MemoDialogInfoStatus.hide
+            MemoDialogInfoStatus.HIDE
         )
     }
 
@@ -69,7 +70,7 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
     }
 
     Card(
-        onClick = { memoDialogInfoStatus = MemoDialogInfoStatus.show },
+        onClick = { memoDialogInfoStatus = MemoDialogInfoStatus.SHOW },
         elevation = 10.dp,
         modifier = Modifier
             .fillMaxSize()
@@ -88,16 +89,19 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
                 Text(text = memo.name, modifier = Modifier)
                 Text(text = memo.date, modifier = Modifier)
                 Text(text = memo.type, modifier = Modifier)
+                Text(text = memo.days, modifier = Modifier)
+                Text(text = fromStringToBooleanDayList(memo.days).toString(), modifier = Modifier)
+
+
             }
 
             PlayPauseButton(player = player)
             //DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
         }
 
-        if (memoDialogInfoStatus == MemoDialogInfoStatus.show) {
+        if (memoDialogInfoStatus == MemoDialogInfoStatus.SHOW) {
             memoDialogInfoStatus = ShowUpdateMemo(
                 memo = memo,
-                file = File(memo.fileName),
                 memoViewModel = memoViewModel
             )
         }

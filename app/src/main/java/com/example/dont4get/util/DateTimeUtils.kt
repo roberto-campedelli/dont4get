@@ -87,3 +87,24 @@ fun getDelayFromDaysAndTime(choosenDays: List<Boolean>, time: String): List<Long
 
 }
 
+fun fromBooleanDayListToString(chosenDays: List<Boolean>): String {
+    val dayNameList = listOf("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
+    var days = ""
+    for (i in 0..6) {
+        if (chosenDays[i])
+            days = days.plus("${dayNameList[i]} ")
+    }
+    return days
+}
+
+fun fromStringToBooleanDayList(dayList: String): List<Boolean> {
+    val dayNameList = listOf("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
+    val dayListSplit = dayList.trim().split(" ")
+    val days = mutableListOf<Boolean>()
+    for (day in dayNameList) {
+        days.add(day in dayListSplit)
+    }
+    return days
+}
+
+

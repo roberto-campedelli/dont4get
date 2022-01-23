@@ -152,7 +152,7 @@ fun FAB(memoViewModel: MemoViewModel) {
             LinearRecProgress()
         } else if (buttonState == ButtonState.Released && fileName != null) {
             memo = StopRec(fileName!!)
-            SaveMemo(memo, fileName!!, memoViewModel)
+            SaveMemoDialog(memo, fileName!!, memoViewModel)
         }
     }
 }
@@ -246,7 +246,8 @@ fun StopRec(fileName: File): Memo {
         fileName = fileName.toString(),
         name = "UndefinedName",
         date = "UndefinedDate",
-        type = "UndefinedType"
+        type = "UndefinedType",
+        days = "UndefinedDays"
     )
 }
 

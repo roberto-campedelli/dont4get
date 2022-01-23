@@ -15,4 +15,6 @@ data class Memo(
     @ColumnInfo(name = "date") var date: String,
 
     @ColumnInfo(name = "type") var type: String,
+
+    @ColumnInfo(name = "days") var days: String,
 )
