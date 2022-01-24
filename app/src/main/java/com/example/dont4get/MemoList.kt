@@ -23,9 +23,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
-import com.example.dont4get.util.fromStringToBooleanDayList
+import com.example.dont4get.util.fromStringToDateTime
 import java.io.File
 import java.io.FileInputStream
 
@@ -86,13 +87,21 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
                     .wrapContentSize()
                     .padding(10.dp)
             ) {
-                Text(text = memo.name, modifier = Modifier)
-                Text(text = memo.date, modifier = Modifier)
-                Text(text = memo.type, modifier = Modifier)
-                Text(text = memo.days, modifier = Modifier)
-                Text(text = fromStringToBooleanDayList(memo.days).toString(), modifier = Modifier)
-
-
+                Text(text = memo.name, fontSize = 25.sp)
+                if (memo.type == "Weekly") {
+                    Text(text = memo.days)
+                    Text(text = memo.date)
+                } else {
+                    val targetDateTime = fromStringToDateTime(memo.date)
+                    val dayOfWeek = targetDateTime.dayOfWeek.toString()[0].plus(
+                        targetDateTime.dayOfWeek.toString().substring(1, 3).lowercase()
+                    )
+                    val month = targetDateTime.month.toString()[0].plus(
+                        targetDateTime.month.toString().substring(1, 3).lowercase()
+                    )
+                    Text(text = "$dayOfWeek ${targetDateTime.dayOfMonth} $month")
+                    Text(text = "${targetDateTime.hour}:${targetDateTime.minute}")
+                }
             }
 
             PlayPauseButton(player = player)
@@ -100,7 +109,7 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
         }
 
         if (memoDialogInfoStatus == MemoDialogInfoStatus.SHOW) {
-            memoDialogInfoStatus = ShowUpdateMemo(
+            memoDialogInfoStatus = showUpdateMemo(
                 memo = memo,
                 memoViewModel = memoViewModel
             )
