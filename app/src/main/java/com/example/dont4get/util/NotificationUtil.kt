@@ -1,16 +1,28 @@
 package com.example.dont4get.util
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toUri
 import androidx.work.*
 import com.example.dont4get.CHANNEL_ID
 import com.example.dont4get.MainActivity
 import com.example.dont4get.R
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
+
+fun setAlarm(context: Context, millis: Long, memoName: String) {
+    val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, AlarmReceiver::class.java)
+    val data = memoName.toUri()
+    intent.data = data
+    val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+    alarmManager.setExact(AlarmManager.RTC_WAKEUP, millis, pendingIntent)
+}
 
 class OneTimeScheduleWorker(
     private val context: Context,

@@ -87,7 +87,7 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
                     .wrapContentSize()
                     .padding(10.dp)
             ) {
-                Text(text = memo.name, fontSize = 25.sp)
+                Text(text = memo.name, fontSize = 23.sp)
                 if (memo.type == "Weekly") {
                     Text(text = memo.days)
                     Text(text = memo.date)

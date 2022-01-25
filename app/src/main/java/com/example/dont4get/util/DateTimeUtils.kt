@@ -17,6 +17,12 @@ fun getNotificationDelay(dateAndTime: String): Long {
     return duration.seconds
 }
 
+fun getNotificationDelayMillis(dateAndTime: String): Long {
+    val targetDate = fromStringToDateTime(dateAndTime = dateAndTime)
+    val duration = Duration.between(LocalDateTime.now(), targetDate)
+    return duration.toMillis()
+}
+
 // from string 2011/12/03-10:15 to LocalDateTime '2011-12-03T10:15:30'
 fun fromStringToDateTime(dateAndTime: String): LocalDateTime {
     // i receive the date in this format '2011/12/03-10:15'

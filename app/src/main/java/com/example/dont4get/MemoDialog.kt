@@ -31,6 +31,7 @@ import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
 import com.example.dont4get.util.*
 import java.io.File
+import java.time.ZoneId
 import java.util.*
 
 //enum class reminderState { Once, Weekly, Daily }
@@ -119,7 +120,21 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             Toast.makeText(context, memo.days, Toast.LENGTH_SHORT).show()
                             if (reminderType == "Once") {
                                 val delay = getNotificationDelay(memo.date)
-                                scheduleOneTimeNotification(delay, context, memo.name)
+                                val tmp =
+                                    fromStringToDateTime(memo.date).atZone(ZoneId.systemDefault())
+                                        .toInstant().toEpochMilli()
+                                //setAlarm(context= context, millis = tmp, "questo funziona")
+                                setAlarm(
+                                    context = context,
+                                    millis = System.currentTimeMillis() + getNotificationDelayMillis(
+                                        memo.date
+                                    ),
+                                    "questo funziona"
+                                )
+                                //scheduleOneTimeNotification(delay, context, memo.name)
+                                //Log.i("with the timezone", tmp.toString())
+                                //Log.i("millis + delay", "${System.currentTimeMillis() + getNotificationDelayMillis(memo.date)}")
+
                             } else if (reminderType == "Weekly") {
                                 setWeeklyMemos(
                                     getDelayFromDaysAndTime(
