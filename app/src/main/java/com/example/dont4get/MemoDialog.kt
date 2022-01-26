@@ -3,6 +3,7 @@ package com.example.dont4get
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Build
+import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -124,24 +125,34 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                                     fromStringToDateTime(memo.date).atZone(ZoneId.systemDefault())
                                         .toInstant().toEpochMilli()
                                 //setAlarm(context= context, millis = tmp, "questo funziona")
+                                Log.i(
+                                    "delays once",
+                                    (System.currentTimeMillis() + getNotificationDelayMillis(memo.date)).toString()
+                                )
                                 setAlarm(
                                     context = context,
                                     millis = System.currentTimeMillis() + getNotificationDelayMillis(
                                         memo.date
                                     ),
-                                    "questo funziona"
+                                    memo.name
                                 )
                                 //scheduleOneTimeNotification(delay, context, memo.name)
                                 //Log.i("with the timezone", tmp.toString())
                                 //Log.i("millis + delay", "${System.currentTimeMillis() + getNotificationDelayMillis(memo.date)}")
 
                             } else if (reminderType == "Weekly") {
+                                setWeeklyMemosAlarm(
+                                    getDelayFromDaysAndTimeAlarm(
+                                        choosenDays = chosenDays,
+                                        memo.date,
+                                    ), context, memoName = memo.name
+                                )/*
                                 setWeeklyMemos(
                                     getDelayFromDaysAndTime(
                                         choosenDays = chosenDays,
                                         memo.date,
                                     ), context, memoName = memo.name
-                                )
+                                )*/
                             }
                         },
                         enabled = saveButtonEnabled
@@ -236,6 +247,7 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
                         onClick = {
                             openDialog.value = false
                             memoDialogInfoStatus = MemoDialogInfoStatus.HIDE
+                            cancelAlarm(context = context, memoName = memo.name)
                             cancelNotification(context = context, memo.name)
                             memoViewModel.deleteMemo(memo)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()

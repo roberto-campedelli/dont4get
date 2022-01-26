@@ -4,7 +4,10 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
@@ -15,6 +18,7 @@ import com.example.dont4get.R
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
+@RequiresApi(Build.VERSION_CODES.S)
 fun setAlarm(context: Context, millis: Long, memoName: String) {
     val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, AlarmReceiver::class.java)
@@ -22,6 +26,41 @@ fun setAlarm(context: Context, millis: Long, memoName: String) {
     intent.data = data
     val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
     alarmManager.setExact(AlarmManager.RTC_WAKEUP, millis, pendingIntent)
+}
+
+@RequiresApi(Build.VERSION_CODES.S)
+fun setPeriodicAlarm(context: Context, millis: Long, memoName: String) {
+    val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, AlarmReceiver::class.java)
+    val data = memoName.toUri()
+    intent.data = data
+    val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+    val oneWeekInMillis = TimeUnit.DAYS.toMillis(7)
+    Log.i("one week in millis ", oneWeekInMillis.toString())
+    alarmManager.setRepeating(
+        AlarmManager.RTC_WAKEUP,
+        millis,
+        AlarmManager.INTERVAL_DAY * 7,
+        pendingIntent
+    )
+}
+
+fun setWeeklyMemosAlarm(delays: List<Long>, context: Context, memoName: String) {
+
+    for (delay in delays) {
+        setPeriodicAlarm(context, delay, memoName = memoName)
+        //setAlarm(context,delay,  memoName = memoName)
+    }
+
+}
+
+fun cancelAlarm(context: Context, memoName: String) {
+    val alarmManager = context.getSystemService(ComponentActivity.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, AlarmReceiver::class.java)
+    val data = memoName.toUri()
+    intent.data = data
+    val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
+    alarmManager.cancel(pendingIntent)
 }
 
 class OneTimeScheduleWorker(
