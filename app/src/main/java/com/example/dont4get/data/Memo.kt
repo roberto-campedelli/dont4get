@@ -11,7 +11,8 @@ data class Memo(
     @ColumnInfo(name = "fileName") val fileName: String,
 
     @ColumnInfo(name = "name") var name: String,
-
+    // yyyy/mm/dd - hh:mm for OnceMemo
+    // hh:mm for WeeklyMemo
     @ColumnInfo(name = "date") var date: String,
 
     @ColumnInfo(name = "type") var type: String,

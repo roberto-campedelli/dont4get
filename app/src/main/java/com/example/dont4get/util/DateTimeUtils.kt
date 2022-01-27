@@ -122,7 +122,6 @@ fun getDelayFromDaysAndTimeAlarm(choosenDays: List<Boolean>, time: String): List
     }
 
     for (targetDateTime in targetDateTimes) {
-        val zdt = ZonedDateTime.of(targetDateTime, ZoneId.systemDefault())
         delays.add(targetDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
         delays2.add(
             System.currentTimeMillis() + Duration.between(

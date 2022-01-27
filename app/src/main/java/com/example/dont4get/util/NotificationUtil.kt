@@ -45,11 +45,11 @@ fun setPeriodicAlarm(context: Context, millis: Long, memoName: String) {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 fun setWeeklyMemosAlarm(delays: List<Long>, context: Context, memoName: String) {
 
     for (delay in delays) {
         setPeriodicAlarm(context, delay, memoName = memoName)
-        //setAlarm(context,delay,  memoName = memoName)
     }
 
 }

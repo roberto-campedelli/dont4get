@@ -100,7 +100,8 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
                         targetDateTime.month.toString().substring(1, 3).lowercase()
                     )
                     Text(text = "$dayOfWeek ${targetDateTime.dayOfMonth} $month")
-                    Text(text = "${targetDateTime.hour}:${targetDateTime.minute}")
+                    Text(text = "%02d:%02d".format(targetDateTime.hour, targetDateTime.minute))
+
                 }
             }
 

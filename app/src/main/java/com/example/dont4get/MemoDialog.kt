@@ -3,7 +3,6 @@ package com.example.dont4get
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Build
-import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -32,7 +31,6 @@ import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
 import com.example.dont4get.util.*
 import java.io.File
-import java.time.ZoneId
 import java.util.*
 
 //enum class reminderState { Once, Weekly, Daily }
@@ -87,9 +85,6 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             memo.days = fromBooleanDayListToString(chosenDays = chosenDays)
                             memo.date = TimePicker("")
                         }
-                        "Daily" -> {
-                            memo.date = TimePicker("")
-                        }
                     }
                 }
             },
@@ -120,15 +115,6 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             memoViewModel.addMemo(memo)
                             Toast.makeText(context, memo.days, Toast.LENGTH_SHORT).show()
                             if (reminderType == "Once") {
-                                val delay = getNotificationDelay(memo.date)
-                                val tmp =
-                                    fromStringToDateTime(memo.date).atZone(ZoneId.systemDefault())
-                                        .toInstant().toEpochMilli()
-                                //setAlarm(context= context, millis = tmp, "questo funziona")
-                                Log.i(
-                                    "delays once",
-                                    (System.currentTimeMillis() + getNotificationDelayMillis(memo.date)).toString()
-                                )
                                 setAlarm(
                                     context = context,
                                     millis = System.currentTimeMillis() + getNotificationDelayMillis(
@@ -136,9 +122,6 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                                     ),
                                     memo.name
                                 )
-                                //scheduleOneTimeNotification(delay, context, memo.name)
-                                //Log.i("with the timezone", tmp.toString())
-                                //Log.i("millis + delay", "${System.currentTimeMillis() + getNotificationDelayMillis(memo.date)}")
 
                             } else if (reminderType == "Weekly") {
                                 setWeeklyMemosAlarm(
@@ -146,13 +129,7 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                                         choosenDays = chosenDays,
                                         memo.date,
                                     ), context, memoName = memo.name
-                                )/*
-                                setWeeklyMemos(
-                                    getDelayFromDaysAndTime(
-                                        choosenDays = chosenDays,
-                                        memo.date,
-                                    ), context, memoName = memo.name
-                                )*/
+                                )
                             }
                         },
                         enabled = saveButtonEnabled
@@ -248,7 +225,7 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
                             openDialog.value = false
                             memoDialogInfoStatus = MemoDialogInfoStatus.HIDE
                             cancelAlarm(context = context, memoName = memo.name)
-                            cancelNotification(context = context, memo.name)
+                            //cancelNotification(context = context, memo.name)
                             memoViewModel.deleteMemo(memo)
                             Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
                         }
@@ -265,16 +242,22 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
                             //if i change the name of the memo i need to delete the notification
                             //about the previous memo and after that i can update the name
                             if (memo.name != name.text)
-                                cancelNotification(context = context, memoName = memo.name)
+                                cancelAlarm(context = context, memoName = memo.name)
                             memo.name = name.text
                             memo.days = fromBooleanDayListToString(chosenDays = chosenDays)
                             memoViewModel.updateMemo(memo)
                             if (reminderType == "Once") {
-                                val delay = getNotificationDelay(memo.date)
-                                scheduleOneTimeNotification(delay, context, memo.name)
+                                setAlarm(
+                                    context = context,
+                                    millis = System.currentTimeMillis() + getNotificationDelayMillis(
+                                        memo.date
+                                    ),
+                                    memo.name
+                                )
+
                             } else if (reminderType == "Weekly") {
-                                setWeeklyMemos(
-                                    getDelayFromDaysAndTime(
+                                setWeeklyMemosAlarm(
+                                    getDelayFromDaysAndTimeAlarm(
                                         choosenDays = chosenDays,
                                         memo.date,
                                     ), context, memoName = memo.name
@@ -289,7 +272,6 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
 
                 }
             },
-            //properties = DialogProperties(false, false)
         )
     }
     return memoDialogInfoStatus

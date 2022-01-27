@@ -91,6 +91,7 @@ fun RecButton() {
         viewModel(factory = MemoViewModelFactory(context.applicationContext as Application))
 
     val memos = memoViewModel.allMemo.observeAsState(listOf()).value
+    //val sortedMemos = memos.sortedBy { it.date }
 
     Scaffold(
         topBar = { myTopAppBar() },
