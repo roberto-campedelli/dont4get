@@ -41,7 +41,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 const val CHANNEL_ID = "channel"
-private val permissions = arrayListOf(RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE)
+private val permissions = arrayListOf(RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, SCHEDULE_EXACT_ALARM)
 private var recorder: MediaRecorder? = null
 
 class MainActivity : ComponentActivity() {
@@ -82,7 +82,6 @@ enum class ButtonState { Pressed, Released, Initial }
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @RequiresApi(Build.VERSION_CODES.S)
-@ExperimentalPermissionsApi
 @Composable
 fun RecButton() {
 
@@ -113,7 +112,6 @@ fun myTopAppBar() {
 }
 
 @RequiresApi(Build.VERSION_CODES.S)
-@ExperimentalPermissionsApi
 @Composable
 fun FAB(memoViewModel: MemoViewModel) {
     var buttonState by remember { mutableStateOf(ButtonState.Initial) }
@@ -178,8 +176,8 @@ fun LinearRecProgress() {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
-@ExperimentalPermissionsApi
+@OptIn(ExperimentalPermissionsApi::class)
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun StartRec(): File {
 
@@ -187,6 +185,7 @@ fun StartRec(): File {
     var fileName: File? = null
 
     val permissionsState = rememberMultiplePermissionsState(permissions)
+
     when {
         // If the camera permission is granted, then show screen with the feature enabled
         permissionsState.allPermissionsGranted -> {
@@ -197,7 +196,7 @@ fun StartRec(): File {
             val currentDate = LocalDateTime.now()
             val formatter = DateTimeFormatter.ISO_DATE_TIME
             fileName = File(mPath, currentDate.format(formatter) + ".opus")
-            recorder = MediaRecorder()
+            recorder = MediaRecorder(context)
 
             recorder?.apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)

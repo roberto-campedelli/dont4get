@@ -44,7 +44,7 @@ class MemoViewModel(application: Application) : AndroidViewModel(application) {
 class MemoViewModelFactory(
     private val application: Application
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
         if (modelClass.isAssignableFrom(MemoViewModel::class.java)) {
             return MemoViewModel(application) as T
