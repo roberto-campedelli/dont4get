@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.graphics.Color.red
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
@@ -15,10 +16,10 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,7 +42,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 const val CHANNEL_ID = "channel"
-private val permissions = arrayListOf(RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, SCHEDULE_EXACT_ALARM)
+
+@RequiresApi(Build.VERSION_CODES.S)
+private val permissions = arrayListOf(RECORD_AUDIO, READ_EXTERNAL_STORAGE)
 private var recorder: MediaRecorder? = null
 
 class MainActivity : ComponentActivity() {
@@ -88,26 +91,24 @@ fun RecButton() {
     val context = LocalContext.current
     val memoViewModel: MemoViewModel =
         viewModel(factory = MemoViewModelFactory(context.applicationContext as Application))
-
     val memos = memoViewModel.allMemo.observeAsState(listOf()).value
     //val sortedMemos = memos.sortedBy { it.date }
 
     Scaffold(
-        topBar = { myTopAppBar() },
+        topBar = { MyTopAppBar() },
         floatingActionButton = { FAB(memoViewModel) },
         isFloatingActionButtonDocked = false,
         floatingActionButtonPosition = FabPosition.End,
         content = {
             MemoList(memos, memoViewModel)
-
         }
     )
 }
 
 @Composable
-fun myTopAppBar() {
+fun MyTopAppBar() {
     TopAppBar(
-        title = { Text("RECUP") },
+        title = { Text("Dont4Get") },
     )
 }
 
@@ -123,9 +124,8 @@ fun FAB(memoViewModel: MemoViewModel) {
         backgroundColor = Color.Red,
         modifier = Modifier
             .padding(20.dp)
-            .size(85.dp),
-
-        ) {
+            .size(90.dp),
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -145,58 +145,44 @@ fun FAB(memoViewModel: MemoViewModel) {
                     )
                 })
         if (buttonState == ButtonState.Pressed) {
-            Text(text = "$buttonState")
-            fileName = StartRec()
+            fileName = startRec()
             CircularRecProgress()
-            LinearRecProgress()
         } else if (buttonState == ButtonState.Released && fileName != null) {
-            memo = StopRec(fileName!!)
-            SaveMemoDialog(memo, fileName!!, memoViewModel)
+            memo = stopRec(fileName!!)
+            SaveMemoDialog(memo, memoViewModel)
         }
     }
 }
 
+@Preview
 @Composable
 fun CircularRecProgress() {
     CircularProgressIndicator(
         modifier = Modifier
             .size(300.dp),
-        color = Color.Yellow,
-        strokeWidth = 3.5.dp,
-
-        )
-}
-
-@Composable
-fun LinearRecProgress() {
-    LinearProgressIndicator(
-        modifier = Modifier
-            .size(200.dp),
-        color = Color.Yellow,
+        color = Color(0xffffffff),
+        strokeWidth = 4.dp,
     )
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun StartRec(): File {
+fun startRec(): File? {
 
     val context = LocalContext.current
     var fileName: File? = null
-
     val permissionsState = rememberMultiplePermissionsState(permissions)
 
     when {
-        // If the camera permission is granted, then show screen with the feature enabled
+        // if all the permissions are granted
         permissionsState.allPermissionsGranted -> {
-            //start record
-
             val mPath = context.filesDir
             //val mPath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
             val currentDate = LocalDateTime.now()
             val formatter = DateTimeFormatter.ISO_DATE_TIME
             fileName = File(mPath, currentDate.format(formatter) + ".opus")
-            recorder = MediaRecorder(context)
+            recorder = MediaRecorder()
 
             recorder?.apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -210,38 +196,39 @@ fun StartRec(): File {
                 e.printStackTrace()
                 Log.e("Audio Record", "recorder failed to prepare")
             }
-            Toast.makeText(context, "sto registrando", Toast.LENGTH_SHORT).show()
-            Toast.makeText(context, fileName.toString(), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "I'm recording", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, fileName.toString(), Toast.LENGTH_SHORT).show()
 
             recorder!!.start()
             //Toast.makeText(context, "Camera permission Granted", Toast.LENGTH_SHORT).show()
-            //.fileName =
         }
-        // If the user denied the permission but a rationale should be shown, or the user sees
-        // the permission for the first time, explain why the feature is needed by the app and allow
-        // the user to be presented with the permission again or to not see the rationale any more.
-        permissionsState.shouldShowRationale ||
-                !permissionsState.permissionRequested -> {
+        // if the permission are not granted i ask for them
+        else -> {
             LaunchedEffect(permissionsState) {
                 permissionsState.launchMultiplePermissionRequest()
             }
-            //Toast.makeText(context, "GIVE ME THE POWER", Toast.LENGTH_SHORT).show()
+            //i the user deny the permissions, i inform him that i need the permission to work properly
+            if (!permissionsState.allPermissionsGranted) {
+                Toast.makeText(
+                    context,
+                    "I need the permissions to work.\nGo to the application setting! Thanks.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
-
     }
-    return fileName!!
+
+    return fileName
 }
 
 @Composable
-fun StopRec(fileName: File): Memo {
-
-    val context = LocalContext.current
+fun stopRec(fileName: File): Memo {
 
     recorder?.stop()
     recorder?.release()
     recorder = null
 
-    Toast.makeText(context, "ho finito di registrare", Toast.LENGTH_SHORT).show()
+    //Toast.makeText(context, "ho finito di registrare", Toast.LENGTH_SHORT).show()
     return Memo(
         fileName = fileName.toString(),
         name = "UndefinedName",

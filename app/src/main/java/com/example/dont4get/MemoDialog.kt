@@ -30,10 +30,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
 import com.example.dont4get.util.*
-import java.io.File
 import java.util.*
 
-//enum class reminderState { Once, Weekly, Daily }
+//enum class reminderType { Once, Weekly}
 
 fun validateName(name: TextFieldValue): Boolean {
     return name.text.isNotBlank()
@@ -41,7 +40,7 @@ fun validateName(name: TextFieldValue): Boolean {
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
+fun SaveMemoDialog(memo: Memo, memoViewModel: MemoViewModel) {
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
@@ -70,20 +69,20 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             saveButtonEnabled = validateName(name = name)
                         }
                     )
-                    reminderType = MemoRemind(memoType = memo.type)
+                    reminderType = memoRemind(memoType = memo.type)
                     memo.type = reminderType
                     when (reminderType) {
                         "Once" -> {
-                            val date = DatePicker("")
+                            val date = datePicker("")
                             val time = if (date.isNotBlank()) {
-                                TimePickerWithValidation(date = date, time = "")
-                            } else TimePicker("")
+                                timePickerWithValidation(date = date, prevTime = "")
+                            } else timePicker("")
                             memo.date = "$date-$time"
                         }
                         "Weekly" -> {
-                            chosenDays = DayPicker(chosenDays)
+                            chosenDays = dayPicker(chosenDays)
                             memo.days = fromBooleanDayListToString(chosenDays = chosenDays)
-                            memo.date = TimePicker("")
+                            memo.date = timePicker("")
                         }
                     }
                 }
@@ -100,7 +99,7 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                         onClick = {
                             openDialog.value = false
                             memoViewModel.deleteMemo(memo)
-                            Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Memo Deleted", Toast.LENGTH_SHORT).show()
                         }
                     ) {
                         Text("Delete")
@@ -113,7 +112,6 @@ fun SaveMemoDialog(memo: Memo, file: File, memoViewModel: MemoViewModel) {
                             openDialog.value = false
                             memo.name = name.text
                             memoViewModel.addMemo(memo)
-                            Toast.makeText(context, memo.days, Toast.LENGTH_SHORT).show()
                             if (reminderType == "Once") {
                                 setAlarm(
                                     context = context,
@@ -187,27 +185,26 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
                             saveButtonEnabled = validateName(name = name)
                         }
                     )
-                    //reminderType = MemoRemind(memoType = memo.type)
                     memo.type = reminderType
                     when (reminderType) {
                         "Once" -> {
                             // if i want a OnceMemo i need the exact date - year/month/day/hour/minute/seconds
-                            val date = DatePicker(memo.date.substring(0, memo.date.indexOf("-")))
+                            val date = datePicker(memo.date.substring(0, memo.date.indexOf("-")))
                             val time = if (date.isNotBlank()) {
-                                TimePickerWithValidation(
+                                timePickerWithValidation(
                                     date = date,
-                                    time = memo.date.substring(memo.date.indexOf("-") + 1)
+                                    prevTime = memo.date.substring(memo.date.indexOf("-") + 1)
                                 )
-                            } else TimePicker(memo.date.substring(memo.date.indexOf("-") + 1))
+                            } else timePicker(memo.date.substring(memo.date.indexOf("-") + 1))
                             // in the case of OnceMemo the memo.date field contains the date and the time in the format year/month/day-hour:minute
                             memo.date = "$date-$time"
                         }
                         "Weekly" -> {
                             // if i want a WeeklyMemo i need the day of the week when i want to be
                             //notified and the time
-                            chosenDays = DayPicker(chosenDays)
+                            chosenDays = dayPicker(chosenDays)
                             // in the case of WeeklyMemo the memo.date field contains only the time in the format hour:minute
-                            memo.date = TimePicker(memo.date)
+                            memo.date = timePicker(memo.date)
                         }
                     }
                 }
@@ -279,7 +276,7 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
 
 
 @Composable
-fun MemoRemind(memoType: String): String {
+fun memoRemind(memoType: String): String {
 
     val radioOptions = listOf("Once", "Weekly")
     var initialValue = radioOptions[0]
@@ -317,10 +314,9 @@ fun MemoRemind(memoType: String): String {
 }
 
 @Composable
-fun DatePicker(date: String): String {
+fun datePicker(prevDate: String): String {
 
     val context = LocalContext.current
-
     val year: Int
     val month: Int
     val day: Int
@@ -330,9 +326,9 @@ fun DatePicker(date: String): String {
     month = calendar.get(Calendar.MONTH)
     day = calendar.get(Calendar.DAY_OF_MONTH)
 
-    var date by remember { mutableStateOf(date) }
+    var date by remember { mutableStateOf(prevDate) }
 
-    var dataPickerDialog = DatePickerDialog(
+    val dataPickerDialog = DatePickerDialog(
         context,
         { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
             date = "%4d/%02d/%02d".format(year, month + 1, dayOfMonth)
@@ -368,7 +364,7 @@ fun DatePicker(date: String): String {
 
 
 @Composable
-fun TimePicker(time: String): String {
+fun timePicker(prevTime: String): String {
 
     val context = LocalContext.current
 
@@ -379,7 +375,7 @@ fun TimePicker(time: String): String {
     hour = calendar.get(Calendar.HOUR_OF_DAY)
     min = calendar.get(Calendar.MINUTE)
 
-    var time by remember { mutableStateOf(time) }
+    var time by remember { mutableStateOf(prevTime) }
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hour: Int, min: Int ->
@@ -412,7 +408,7 @@ fun TimePicker(time: String): String {
 }
 
 @Composable
-fun TimePickerWithValidation(date: String, time: String): String {
+fun timePickerWithValidation(date: String, prevTime: String): String {
 
     val context = LocalContext.current
 
@@ -427,7 +423,7 @@ fun TimePickerWithValidation(date: String, time: String): String {
     hour = calendar.get(Calendar.HOUR_OF_DAY)
     min = calendar.get(Calendar.MINUTE)
 
-    var time by remember { mutableStateOf(time) }
+    var time by remember { mutableStateOf(prevTime) }
     val timePickerDialog = TimePickerDialog(
         context,
         { _, hour: Int, min: Int ->
@@ -473,7 +469,7 @@ fun TimePickerWithValidation(date: String, time: String): String {
 }
 
 @Composable
-fun DayPicker(daysList: List<Boolean>): List<Boolean> {
+fun dayPicker(daysList: List<Boolean>): List<Boolean> {
 
     var mon by remember { mutableStateOf(daysList[0]) }
     var tue by remember { mutableStateOf(daysList[1]) }
