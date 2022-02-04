@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dont4get.data.Memo
@@ -50,8 +49,6 @@ enum class MemoDialogInfoStatus { HIDE, SHOW }
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
-
-    val context = LocalContext.current
 
     var memoDialogInfoStatus by remember {
         mutableStateOf(
@@ -106,11 +103,12 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
             }
 
             PlayPauseButton(player = player)
+            // For now no delete button in the memo card
             //DeleteButton(memo = memo, memoViewModel = memoViewModel, context = context)
         }
 
         if (memoDialogInfoStatus == MemoDialogInfoStatus.SHOW) {
-            memoDialogInfoStatus = showUpdateMemo(
+            memoDialogInfoStatus = updateMemoDialog(
                 memo = memo,
                 memoViewModel = memoViewModel
             )
@@ -118,6 +116,8 @@ fun MemoCard(memo: Memo, memoViewModel: MemoViewModel) {
     }
 }
 
+
+// Code for the progress indicator of the player - still WIP
 @Composable
 fun PlayPauseButton(player: MediaPlayer) {
 
@@ -166,14 +166,6 @@ fun PlayPauseButton(player: MediaPlayer) {
         }
     }
 
-/*    Column() {
-        Text(text = progress.toString())
-        Text(text = playerState.toString())
-        Text(text = position.toString())
-        Spacer(Modifier.requiredHeight(10.dp))
-
-        MyIndicator(indicatorProgress = progress)
-    }*/
 }
 
 //TODO - inserisci progress bar e tasti per andare avanti e indietro!

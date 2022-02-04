@@ -5,7 +5,6 @@ import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.graphics.Color.red
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
@@ -16,9 +15,6 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -56,12 +52,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        createChannel(notificationManager = notificationManager)
+        createNotificationChannel(notificationManager = notificationManager)
         setContent() {
             Dont4getTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    RecButton()
+                    Home()
                 }
             }
         }
@@ -74,9 +70,9 @@ class MainActivity : ComponentActivity() {
 @ExperimentalPermissionsApi
 @Preview
 @Composable
-fun RecButtonPreview() {
+fun HomePreview() {
     Dont4getTheme {
-        RecButton()
+        Home()
     }
 }
 
@@ -86,7 +82,7 @@ enum class ButtonState { Pressed, Released, Initial }
 @ExperimentalAnimationApi
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun RecButton() {
+fun Home() {
 
     val context = LocalContext.current
     val memoViewModel: MemoViewModel =
@@ -239,7 +235,7 @@ fun stopRec(fileName: File): Memo {
 }
 
 
-private fun createChannel(notificationManager: NotificationManager) {
+private fun createNotificationChannel(notificationManager: NotificationManager) {
     // Create the NotificationChannel
     val name = "Reminder Notification"
     val descriptionText = "Reminder Notification"

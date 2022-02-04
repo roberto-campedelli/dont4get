@@ -69,7 +69,7 @@ fun SaveMemoDialog(memo: Memo, memoViewModel: MemoViewModel) {
                             saveButtonEnabled = validateName(name = name)
                         }
                     )
-                    reminderType = memoRemind(memoType = memo.type)
+                    reminderType = memoTypeSelector(memoType = memo.type)
                     memo.type = reminderType
                     when (reminderType) {
                         "Once" -> {
@@ -145,7 +145,7 @@ fun SaveMemoDialog(memo: Memo, memoViewModel: MemoViewModel) {
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStatus {
+fun updateMemoDialog(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStatus {
     val context = LocalContext.current
 
     val openDialog = remember { mutableStateOf(true) }
@@ -224,7 +224,7 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
                             cancelAlarm(context = context, memoName = memo.name)
                             //cancelNotification(context = context, memo.name)
                             memoViewModel.deleteMemo(memo)
-                            Toast.makeText(context, "memo eliminato", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Memo Deleted", Toast.LENGTH_SHORT).show()
                         }
                     ) {
                         Text("Delete")
@@ -276,7 +276,7 @@ fun showUpdateMemo(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoStat
 
 
 @Composable
-fun memoRemind(memoType: String): String {
+fun memoTypeSelector(memoType: String): String {
 
     val radioOptions = listOf("Once", "Weekly")
     var initialValue = radioOptions[0]
@@ -358,7 +358,6 @@ fun datePicker(prevDate: String): String {
                 .padding(top = 3.dp)
                 .clickable { dataPickerDialog.show() })
     }
-
     return date
 }
 
@@ -437,7 +436,7 @@ fun timePickerWithValidation(date: String, prevTime: String): String {
             Toast.makeText(
                 context,
                 "Unfortunately you can't go back in time, pick a valid date!",
-                Toast.LENGTH_LONG
+                Toast.LENGTH_SHORT
             ).show()
         } else
             isTimeValid = true

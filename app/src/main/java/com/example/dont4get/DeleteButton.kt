@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.dont4get.data.Memo
 import com.example.dont4get.data.MemoViewModel
+import com.example.dont4get.util.cancelAlarm
 import com.example.dont4get.util.cancelNotification
 
 @Composable
@@ -19,7 +20,7 @@ fun DeleteButton(memo: Memo, memoViewModel: MemoViewModel, context: Context) {
     IconButton(
         onClick = {
             memoViewModel.deleteMemo(memo)
-            cancelNotification(context = context, memo.name)
+            cancelAlarm(context = context, memo.name)
         },
         modifier = Modifier.padding(5.dp)
     ) {

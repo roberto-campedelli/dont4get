@@ -63,6 +63,8 @@ fun cancelAlarm(context: Context, memoName: String) {
     alarmManager.cancel(pendingIntent)
 }
 
+// Old notification management using WorkManager
+
 class OneTimeScheduleWorker(
     private val context: Context,
     workerParams: WorkerParameters
