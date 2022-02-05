@@ -94,7 +94,7 @@ fun Home() {
         topBar = { MyTopAppBar() },
         floatingActionButton = { FAB(memoViewModel) },
         isFloatingActionButtonDocked = false,
-        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButtonPosition = FabPosition.Center,
         content = {
             MemoList(memos, memoViewModel)
         }

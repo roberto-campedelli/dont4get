@@ -35,8 +35,6 @@ fun setPeriodicAlarm(context: Context, millis: Long, memoName: String) {
     val data = memoName.toUri()
     intent.data = data
     val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0)
-    val oneWeekInMillis = TimeUnit.DAYS.toMillis(7)
-    Log.i("one week in millis ", oneWeekInMillis.toString())
     alarmManager.setRepeating(
         AlarmManager.RTC_WAKEUP,
         millis,
