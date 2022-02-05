@@ -41,8 +41,8 @@ fun validateName(name: TextFieldValue): Boolean {
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun SaveMemoDialog(memo: Memo, memoViewModel: MemoViewModel) {
-    val context = LocalContext.current
 
+    val context = LocalContext.current
     val openDialog = remember { mutableStateOf(true) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var reminderType by remember { mutableStateOf("") }
