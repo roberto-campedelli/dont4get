@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
@@ -13,12 +14,14 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.snapshots.Snapshot.Companion.observe
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -26,10 +29,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.dont4get.data.Memo
-import com.example.dont4get.data.MemoViewModel
-import com.example.dont4get.data.MemoViewModelFactory
+import com.example.dont4get.data.*
 import com.example.dont4get.ui.theme.Dont4getTheme
+import com.example.dont4get.util.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import java.io.File
@@ -97,9 +99,20 @@ fun Home() {
         floatingActionButtonPosition = FabPosition.Center,
         content = {
             MemoList(memos, memoViewModel)
+            Button(onClick = { TestFunction(context = context) }) {
+                Text(text = "Test")
+            }
         }
     )
 }
+
+
+@RequiresApi(Build.VERSION_CODES.S)
+fun TestFunction(context: Context) {
+
+    retrieveMemos(context = context)
+}
+
 
 @Composable
 fun MyTopAppBar() {

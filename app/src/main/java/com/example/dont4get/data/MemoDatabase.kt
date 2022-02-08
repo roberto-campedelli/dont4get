@@ -24,7 +24,7 @@ abstract class MemoDatabase : RoomDatabase() {
                         context.applicationContext,
                         MemoDatabase::class.java,
                         "memo_database"
-                    ).fallbackToDestructiveMigration()
+                    ).fallbackToDestructiveMigration().allowMainThreadQueries()
                         .build()
 
                     INSTANCE = instance

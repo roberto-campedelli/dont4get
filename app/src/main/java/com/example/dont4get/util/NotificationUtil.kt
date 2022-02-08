@@ -1,20 +1,30 @@
 package com.example.dont4get.util
 
 import android.app.AlarmManager
+import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.Observer
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.work.*
 import com.example.dont4get.CHANNEL_ID
 import com.example.dont4get.MainActivity
 import com.example.dont4get.R
+import com.example.dont4get.data.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -90,6 +100,51 @@ class OneTimeScheduleWorker(
         return Result.success()
     }
 
+}
+
+class RetrieveMemosWorker(
+    private val context: Context,
+    workerParams: WorkerParameters
+) : Worker(context, workerParams) {
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun doWork(): Result {
+
+        val memoList = MemoDatabase.getInstance(context = context).memoDao().listAllReboot()
+        for (memo in memoList) {
+            Log.i("db result = ", memo.name + memo.date + memo.type)
+            if (memo.type == "Once") {
+                setAlarm(
+                    context = context,
+                    millis = System.currentTimeMillis() + getNotificationDelayMillis(
+                        memo.date
+                    ),
+                    memo.name
+                )
+                Toast.makeText(context, "set alarm on ${memo.date}!", Toast.LENGTH_LONG).show()
+
+            } else if (memo.type == "Weekly") {
+                setWeeklyMemosAlarm(
+                    getDelayFromDaysAndTimeAlarm(
+                        choosenDays = fromStringToBooleanDayList(memo.days),
+                        memo.date,
+                    ), context, memoName = memo.name
+                )
+                Toast.makeText(context, "set alarm on ${memo.date}!", Toast.LENGTH_LONG).show()
+
+            }
+        }
+
+        return Result.success()
+    }
+}
+
+fun retrieveMemos(context: Context) {
+    val work =
+        OneTimeWorkRequestBuilder<RetrieveMemosWorker>()
+            .build()
+
+    WorkManager.getInstance(context).enqueue(work)
 }
 
 fun scheduleOneTimeNotification(initialDelay: Long, context: Context, memoName: String) {

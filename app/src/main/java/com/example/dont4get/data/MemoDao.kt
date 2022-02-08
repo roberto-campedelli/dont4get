@@ -18,5 +18,7 @@ interface MemoDao {
     @Query("SELECT * FROM memo_table")
     fun listAll(): LiveData<List<Memo>>
 
+    @Query("SELECT * FROM memo_table")
+    fun listAllReboot(): List<Memo>
 
 }

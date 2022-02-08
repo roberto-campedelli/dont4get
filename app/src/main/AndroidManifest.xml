@@ -26,6 +26,7 @@
         </activity>
 
         <receiver android:name=".util.AlarmReceiver" />
+
         <receiver
             android:name=".util.RetrieveAlarmBootReceiver"
             android:enabled="true"
