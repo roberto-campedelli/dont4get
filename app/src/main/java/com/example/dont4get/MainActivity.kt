@@ -99,20 +99,9 @@ fun Home() {
         floatingActionButtonPosition = FabPosition.Center,
         content = {
             MemoList(memos, memoViewModel)
-            Button(onClick = { TestFunction(context = context) }) {
-                Text(text = "Test")
-            }
         }
     )
 }
-
-
-@RequiresApi(Build.VERSION_CODES.S)
-fun TestFunction(context: Context) {
-
-    retrieveMemos(context = context)
-}
-
 
 @Composable
 fun MyTopAppBar() {

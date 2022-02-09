@@ -115,7 +115,7 @@ fun SaveMemoDialog(memo: Memo, memoViewModel: MemoViewModel) {
                             if (reminderType == "Once") {
                                 setAlarm(
                                     context = context,
-                                    millis = System.currentTimeMillis() + getNotificationDelayMillis(
+                                    millis = getNotificationDelayMillis(
                                         memo.date
                                     ),
                                     memo.name
@@ -246,7 +246,7 @@ fun updateMemoDialog(memo: Memo, memoViewModel: MemoViewModel): MemoDialogInfoSt
                             if (reminderType == "Once") {
                                 setAlarm(
                                     context = context,
-                                    millis = System.currentTimeMillis() + getNotificationDelayMillis(
+                                    millis = getNotificationDelayMillis(
                                         memo.date
                                     ),
                                     memo.name

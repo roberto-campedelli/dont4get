@@ -16,9 +16,9 @@ fun getNotificationDelay(dateAndTime: String): Long {
 
 fun getNotificationDelayMillis(dateAndTime: String): Long {
     val targetDate = fromStringToDateTime(dateAndTime = dateAndTime)
-    val duration = Duration.between(LocalDateTime.now(), targetDate)
-
-    return duration.toMillis()
+    //val duration = Duration.between(LocalDateTime.now(), targetDate)
+    return targetDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    //return duration.toMillis()
 }
 
 // from string 2011/12/03-10:15 to LocalDateTime '2011-12-03T10:15:30'
@@ -123,15 +123,9 @@ fun getDelayFromDaysAndTimeAlarm(choosenDays: List<Boolean>, time: String): List
 
     for (targetDateTime in targetDateTimes) {
         delays.add(targetDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-        delays2.add(
-            System.currentTimeMillis() + Duration.between(
-                LocalDateTime.now(),
-                targetDateTime
-            ).toMillis()
-        )
+
     }
     Log.i("delays weekly", delays.toString())
-    Log.i("delays2 weekly", delays2.toString())
 
     return delays
 }

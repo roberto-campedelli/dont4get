@@ -6,9 +6,6 @@ class MemoRepository(private val memoDao: MemoDao) {
 
     val readAllMemo: LiveData<List<Memo>> = memoDao.listAll()
 
-    val readAllMemoReboot: List<Memo> = memoDao.listAllReboot()
-
-
     suspend fun addMemo(memo: Memo) {
         memoDao.insert(memo)
     }

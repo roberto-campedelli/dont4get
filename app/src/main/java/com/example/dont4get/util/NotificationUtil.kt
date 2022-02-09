@@ -116,12 +116,11 @@ class RetrieveMemosWorker(
             if (memo.type == "Once") {
                 setAlarm(
                     context = context,
-                    millis = System.currentTimeMillis() + getNotificationDelayMillis(
+                    millis = getNotificationDelayMillis(
                         memo.date
                     ),
                     memo.name
                 )
-                Toast.makeText(context, "set alarm on ${memo.date}!", Toast.LENGTH_LONG).show()
 
             } else if (memo.type == "Weekly") {
                 setWeeklyMemosAlarm(
@@ -130,7 +129,6 @@ class RetrieveMemosWorker(
                         memo.date,
                     ), context, memoName = memo.name
                 )
-                Toast.makeText(context, "set alarm on ${memo.date}!", Toast.LENGTH_LONG).show()
 
             }
         }
